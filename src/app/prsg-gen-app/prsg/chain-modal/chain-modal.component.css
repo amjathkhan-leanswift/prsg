@@ -1,0 +1,4 @@
+::ng-deep .modal-content .modal-body-wrapper{
+   max-height: 40px !important;
+   overflow:hidden;
+}

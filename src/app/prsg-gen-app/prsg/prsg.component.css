@@ -1,0 +1,238 @@
+.prsg-app-grid{
+   padding:0px;
+}
+.card{
+       min-height: 300px;
+}
+.card.cardmini{
+   min-height: 180px;
+    padding-top: 18px;
+}
+p.labelname{
+   color: #5c5c5c;
+   font-size: 1.2rem;
+}
+.mb0{
+   margin-bottom: 0px;
+}
+.pr0{
+   padding-right: 0px;
+}
+.ml0{
+   margin-left:0px;
+}
+
+.field-short input{
+   width:100%;
+}
+
+.field-short input.textfullwidth{
+   width:100%;
+}
+h1.headerlabel{
+   font-size: 1.4rem;
+    font-weight: 600;
+}
+.field-short.field-date{
+   margin-top: 15px;
+}
+.field-short.field-date.mt5{
+   margin-top: 5px;
+}
+.field-short.field-date label{
+       position: absolute!important;
+    background: #fff!important;
+    left: 5px!important;
+    top: -10px!important;
+    padding: 0 5px!important;
+    display: block!important;
+    font-size: 1rem!important;
+    z-index: 2;
+    color: rgb(80 83 90/90%)!important;
+    width:auto;
+    text-align: left;
+}
+.inline .radio ~ .label-text, .radio + label{
+   font-size: 1.2rem !important;
+}
+.half_div{
+   max-width: 100%;
+    /* width: 100%; */
+    width: calc(100% - 20px);
+    display:inline-block;
+}
+.first_half{
+   float:left;
+   /* margin-left: 20px; */
+   /* width: calc(50% - 20px); */
+   width:100%;
+   padding: 0;
+}
+.second_half{
+   float:left;
+   /* margin-left: 20px;
+   width: calc(50% - 20px); */
+   width:100%;
+   padding: 0;
+}
+
+.eight_half{
+   float:left;
+   width: calc(66.6666666666% - 20px);
+   padding: 0;
+}
+.four_half{
+   float:left;
+   /* margin-left: 20px;
+   width: calc(33.3333333333% - 20px); */
+   width:33.3333333333%;
+   padding: 0;
+}
+.btn-normal{
+   font-weight: 400!important;
+   font-size: 13px!important;
+   padding: 0 15px!important;
+   margin-right: 10px;
+}
+.btn-normal.btn-remove{
+   background-color: #f44336!important;
+}
+.btn-primary.btn-cancel{
+   background-color: #f160a1 !important;
+}
+
+.field.field_agree{
+   margin-bottom: 8px;
+    margin-top: 15px;
+}
+.card.cardpad{
+   padding:10px;
+}
+.btn-primary.btn-confirm{
+   background-color: #28be91 !important;
+}
+.buttondiv{
+   display: inline-block;
+    width: 100%;
+    margin-top: 15px;
+}
+.buttondiv_left{
+   float:left;
+}
+.buttondiv_right{
+   float:right;
+}
+::-webkit-scrollbar-track{
+   background-color:#f7f7f8;
+   border-left:1px solid #d8d8d8
+}
+::-webkit-scrollbar{
+   background-color:transparent;
+   height:10px;
+   width:10px
+}
+::-webkit-scrollbar-thumb{
+   background:#d8d6db;
+   border-radius:10px
+}
+.error_div{
+   position: absolute;
+}
+.error_div span{
+   color:red;
+   font-size: 11px;
+}
+
+::ng-deep .datagrid.small-rowheight .datagrid-cell-wrapper,
+::ng-deep .datagrid.extra-small-rowheight .datagrid-cell-wrapper {
+    padding: 3px 8px 0;
+    font-size: 12px;
+}
+
+::ng-deep .datagrid-header .datagrid-filter-wrapper input{
+   font-size: 12px;
+}
+::ng-deep .toolbar.do-resize .title{
+   font-size: 1.6rem;
+   font-weight: 600;
+}
+::ng-deep .datagrid-result-count,
+::ng-deep .datagrid-group-count {
+    font-size: 1.4rem;
+    font-weight: normal;
+}
+::ng-deep .datagrid-wrapper.left table.datagrid td{
+   background-color:#d8d6db !important;
+}
+::ng-deep .datagrid-wrapper.scrollable-y {
+    overflow-y: hidden !important;
+}
+::ng-deep .pager-toolbar > li.pager-prev > .btn-icon,
+::ng-deep .pager-toolbar > li.pager-first > .btn-icon,
+::ng-deep .pager-toolbar > li.pager-last > .btn-icon,
+::ng-deep .pager-toolbar > li.pager-next > .btn-icon {
+    margin-top: -1px;
+    min-width: 15px !important;
+    width: 20px !important;
+}
+::ng-deep .pager-count > label{
+   font-size: 12px !important;
+}
+::ng-deep .pager-count input {
+    font-size: 13px !important;
+    height: 24px !important;
+    margin: 0 5px;
+    padding: 3px 0 !important;
+    text-align: center;
+    width: 24px !important;
+}
+::ng-deep .pager-pagesize button span {
+    font-size: 13px !important;
+    font-weight: 400;
+    text-transform: none;
+}
+
+::ng-deep .datagrid-wrapper.left table.datagrid td,
+::ng-deep .datagrid-wrapper.right table.datagrid td{
+    background-color: #f0f0f0 !important;
+}
+
+::ng-deep .empty-message .empty-icon{
+   padding:15px 0px !important;
+}
+::ng-deep .icon-empty-state{
+   height: 30px !important;
+}
+::ng-deep .empty-message .empty-title:not(.empty-icon) {
+    font-size: 12px !important;
+    padding-bottom: 20px;
+}
+
+.field-short.field-drop input{
+   width: 60%;
+}
+::ng-deep .field-short.field-drop .dropdown-wrapper{
+   width: 40% !important;
+}
+
+/* new css */
+.search_div{
+   display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+.pr10{
+   padding-right: 10px;
+}
+
+.search_div .field-short {
+    margin-bottom: 0;
+}
+.search_div .btn-normal{
+   margin-bottom: 0px !important;
+}
+::ng-deep .dropdown-list.dropdown-short > .trigger .icon{
+   width:10px !important;
+   top:5px !important;
+}
