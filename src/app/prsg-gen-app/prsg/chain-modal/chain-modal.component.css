@@ -2,3 +2,11 @@
    max-height: 40px !important;
    overflow:hidden;
 }
+::ng-deep .modal-header{
+   border-bottom: 1px solid rgba(0,0,0,0.2);
+   margin-bottom: 20px;
+}
+p.errormsg{
+   text-align: center;
+   font-weight: 600;
+}

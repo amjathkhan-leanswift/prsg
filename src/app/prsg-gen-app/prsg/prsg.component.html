@@ -14,6 +14,7 @@
 
          <div soho-tab-panel-container>
             <div soho-tab-panel tabId="tabs-business-chain">
+
                <div class="row">
                   <div class="twelve columns">
                      <div class="search_div">
@@ -28,13 +29,6 @@
                            <button class="btn-primary btn_width_full btn-normal" type="button" id="search_cus"
                               (click)="searchBusinessChain()">Search</button>
                         </div>
-                        <!-- <div class="field-short">
-                           <select soho-dropdown soho-busyindicator noSearch id="business_chain" name="business_chain"
-                              placeholder="Select Business Chain">
-                              <option value="-1">&nbsp;</option>
-                           </select>
-                        </div> -->
-
                      </div>
                   </div>
                </div>
@@ -43,12 +37,67 @@
                   <div class="twelve columns">
                      <div class="card cardpad">
                         <div #customerLineDatagrid soho-datagrid [gridOptions]="customerGridOptions" soho-busyindicator
-                           [activated]="isCustItemBusy" [blockUI]="true" [displayDelay]="0">
+                           [activated]="isCustItemBusy" [blockUI]="true" [displayDelay]="0"
+                           (selected)="onSelectedCustItem($event.rows)">
                         </div>
                      </div>
                   </div>
                </div>
+
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="search_div">
+                        <div class="field-short pr10">
+                           <svg soho-icon icon="search"></svg>
+                        </div>
+                        <div class="field-short pr10">
+                           <input type="text" name="text-item" id="text-item" placeholder="Items"
+                              [(ngModel)]="itemText">
+                        </div>
+                        <div class="field-short">
+                           <button class="btn-primary btn_width_full btn-normal" type="button" id="search_cus"
+                              (click)="searchItemData()">Search</button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="card cardpad">
+                        <div #itemLineDatagrid soho-datagrid [gridOptions]="itemGridOptions" soho-busyindicator
+                           [activated]="isItemBusy" [blockUI]="true" [displayDelay]="0"
+                           (selected)="onSelectedInvItem($event.rows)">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="field-short field-stacked mb0">
+                        <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button">Cancel</button>
+                        <button class="btn-primary btn_width_full btn-normal" type="button"
+                           (click)="genMatrix()">Confirm</button>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="card cardpad" *ngIf="showMatrix">
+                        <div #matrixLineDatagrid soho-datagrid [gridOptions]="matrixGridOptions" soho-busyindicator
+                           [activated]="isMatrixBusy" [blockUI]="true" [displayDelay]="0">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
             </div>
+
+
+
+
             <div soho-tab-panel tabId="tabs-upload-excel">
 
                <div class="field">

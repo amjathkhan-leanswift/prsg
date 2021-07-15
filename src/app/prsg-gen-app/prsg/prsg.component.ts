@@ -38,13 +38,32 @@ export class PrsgComponent extends CoreBase implements OnInit {
    placeholder?: ViewContainerRef;
 
    isInitItemBusy: boolean = false;
+
    @ViewChild('customerLineDatagrid') customerLineDatagrid: SohoDataGridComponent;
    customerGridOptions: SohoDataGridOptions;
+   isCustItemBusy: boolean = false;
+
+   @ViewChild('itemLineDatagrid') itemLineDatagrid: SohoDataGridComponent;
+   itemGridOptions: SohoDataGridOptions;
+   isItemBusy: boolean = false;
+
+   @ViewChild('matrixLineDatagrid', { static: false }) matrixLineDatagrid?: SohoDataGridComponent;
+   matrixGridOptions: SohoDataGridOptions;
+   isMatrixBusy: boolean = false;
 
    pageSize = 10;
    businessChainText: any;
    customerData: any = [];
-   isCustItemBusy: boolean = false;
+   chainTitle?: string;
+   selectedCustItems?: any = [];
+
+   itemText: any;
+   itemData: any = [];
+   selectedInvItems?: any = [];
+   tempSelectedInvItems?: any = [];
+
+   dynamicColumns?: any = [];
+   showMatrix: boolean = false;
 
    constructor(
       private miService: MIService,
@@ -58,7 +77,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
    ngOnInit(): void {
       this.initData();
       this.initCustomerLineGrid();
-
+      this.initItemLineGrid();
+      //this.initMatrixLineGrid();
    }
 
    onTabActivated(event: any) {
@@ -117,10 +137,81 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.customerGridOptions = customerOptions;
    }
 
+   initItemLineGrid() {
+      const itemOptions: SohoDataGridOptions = {
+         selectable: 'multiple' as SohoDataGridSelectable,
+         disableRowDeactivation: false,
+         clickToSelect: false,
+         alternateRowShading: false,
+         cellNavigation: true,
+         idProperty: 'col-itno',
+         paging: true,
+         pagesize: this.pageSize,
+         indeterminate: false,
+         filterable: true,
+         stickyHeader: false,
+         hidePagerOnOnePage: true,
+         rowHeight: 'small',
+         editable: true,
+         columns: [
+            {
+               width: '5%', id: 'selectionCheckbox', sortable: false,
+               resizable: false, align: 'center', formatter: Soho.Formatters.SelectionCheckbox
+            },
+            {
+               width: '15%', id: 'col-itno', field: 'ITNO', name: 'Item',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '65%', id: 'col-itds', field: 'ITDS', name: 'Name',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-stat', field: 'STAT', name: 'Status',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            }
+         ],
+         dataset: [],
+         // toolbar: { title: 'Customer List', actions: true, results: true, personalize: true, exportToExcel: true },
+         emptyMessage: {
+            title: 'Empty Item List',
+            icon: 'icon-empty-no-data'
+         }
+      };
+      this.itemGridOptions = itemOptions;
+   }
+
+   initMatrixLineGrid() {
+      const matrixOptions: SohoDataGridOptions = {
+         selectable: 'single' as SohoDataGridSelectable,
+         disableRowDeactivation: false,
+         clickToSelect: false,
+         alternateRowShading: false,
+         cellNavigation: false,
+         idProperty: 'col-CUNO',
+         paging: true,
+         pagesize: this.pageSize,
+         indeterminate: false,
+         filterable: false,
+         stickyHeader: false,
+         hidePagerOnOnePage: true,
+         rowHeight: 'small',
+         columns: [],
+         dataset: [],
+         emptyMessage: {
+            title: 'No Order List',
+            icon: 'icon-empty-no-data'
+         }
+      };
+      this.matrixGridOptions = matrixOptions;
+   }
+
    initData() {
       this.setBusy('initialData', true);
       this.setBusy('initialData', false);
    }
+
+   //Customer Search Start
 
    searchBusinessChain() {
       if (this.businessChainText != '' && this.businessChainText != null) {
@@ -148,7 +239,14 @@ export class PrsgComponent extends CoreBase implements OnInit {
             .afterClose((result) => {
                if (result) {
                   //console.log(dialogComponent.selectedChain);
-                  this.LstBusChainCust(dialogComponent.selectedChain)
+                  this.chainTitle = dialogComponent.selectedChain;
+                  if (dialogComponent.selectedChain != undefined && dialogComponent.selectedChain != '-1') {
+                     this.LstBusChainCust(dialogComponent.selectedChain);
+                  } else {
+                     this.customerData = [];
+                     this.customerLineDatagrid.toolbar = { 'title': 'Customer List' };
+                     this.updateCustomerList();
+                  }
                }
             });
       } else {
@@ -205,6 +303,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
             });
       }
       console.log(this.customerData);
+      this.customerLineDatagrid.toolbar = { 'title': this.chainTitle + ' - Customer List' };
       this.updateCustomerList();
       this.setBusy('custData', false);
    }
@@ -213,11 +312,176 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.customerLineDatagrid ? this.customerLineDatagrid.dataset = this.customerData : this.customerLineDatagrid.dataset = this.customerData;
    }
 
+   onSelectedCustItem(args: any) {
+      this.selectedCustItems = [];
+      if (args.length > 0) {
+         args.forEach(item => {
+            this.selectedCustItems.push(item.data);
+         });
+      }
+      console.log(this.selectedCustItems);
+   }
+
+   //Customer Search End
+
+   //Item search start
+
+   async searchItemData() {
+      this.setBusy('itemData', true);
+      this.itemData = [];
+      const inputRecord_item = {
+         SQRY: this.itemText
+      };
+      const request_item: IMIRequest = {
+         program: 'MMS200MI',
+         transaction: 'SearchItem',
+         record: inputRecord_item,
+         outputFields: ['ITNO', 'ITDS', 'STAT']
+      };
+      await this.miService.execute(request_item)
+         .toPromise()
+         .then((response: any) => {
+            let getItemData = response.items;
+            getItemData.forEach((item: any) => {
+               this.itemData.push({ 'ITNO': item.ITNO, 'ITDS': item.ITDS, 'STAT': item.STAT });
+            });
+         })
+         .catch(function (error) {
+            console.log("Item Data Error", error.errorMessage);
+         });
+      // console.log(this.itemData);
+      this.updateItemList();
+      this.setBusy('itemData', false);
+   }
+
+   updateItemList() {
+      if (this.selectedInvItems.length > 0) {
+         let updatedInvItems: any = [];
+         this.tempSelectedInvItems = [];
+         this.selectedInvItems.forEach((item: any) => {
+            updatedInvItems.push(item);
+            this.tempSelectedInvItems.push(item);
+         });
+         this.itemData.forEach((item: any) => {
+            updatedInvItems.push(item);
+         });
+         this.itemData = updatedInvItems;
+      }
+
+      this.itemLineDatagrid?.updatePagingInfo({ activePage: 1 });
+      this.itemLineDatagrid ? this.itemLineDatagrid.dataset = this.itemData : this.itemLineDatagrid.dataset = this.itemData;
+
+      if (this.tempSelectedInvItems.length > 0) {
+         for (let i = 0; i < this.tempSelectedInvItems.length; i++) {
+            this.itemLineDatagrid.selectRows(i);
+         }
+      }
+   }
+
+   onSelectedInvItem(args: any) {
+      this.selectedInvItems = [];
+      if (args.length > 0) {
+         args.forEach(item => {
+            this.selectedInvItems.push(item.data);
+         });
+      }
+      console.log(this.selectedInvItems);
+   }
+
+   //Item search End
+
+   //Matrix Start
+
+   genMatrix() {
+      // console.log("Matrix Click");
+      // console.log(this.selectedCustItems);
+      // console.log(this.tempSelectedInvItems);
+      // console.log(this.selectedInvItems);
+
+      this.dynamicColumns = [];
+
+      if (this.selectedCustItems.length == 0) {
+         this.showToast("Customer Error", "Please Select Customer")
+      } else if (this.selectedInvItems.length == 0) {
+         this.showToast("Item Error", "Please Select Items")
+      } else {
+         this.dynamicColumns.push(
+            {
+               width: 150, id: 'col-cuno', field: 'CUNO', name: 'Customer', resizable: true,
+            },
+            {
+               width: 240, id: 'col-cunm', field: 'CUNM', name: 'Name', resizable: true,
+            },
+         )
+         this.selectedInvItems.forEach((item: any) => {
+            this.dynamicColumns.push(
+               {
+                  'width': 200,
+                  'id': 'col-' + item.ITNO,
+                  'field': item.ITNO,
+                  'name': item.ITNO + '-' + item.ITDS,
+                  'resizable': true,
+                  'formatter': Soho.Formatters.Decimal,
+                  'validate': 'required',
+                  'editor': Soho.Editors.Input
+               }
+            )
+            this.dynamicColumns.push(
+               {
+                  'width': 60,
+                  'id': 'col-uom-' + item.ITNO,
+                  'field': 'uom-' + item.ITNO,
+                  'name': 'UOM',
+                  'resizable': true,
+                  'validate': 'required',
+                  'editor': Soho.Editors.Input
+               }
+            )
+         });
+         //console.log(this.dynamicColumns);
+
+         const matrixOptions: SohoDataGridOptions = {
+
+            selectable: 'single' as SohoDataGridSelectable,
+            disableRowDeactivation: true,
+            clickToSelect: false,
+            alternateRowShading: false,
+            cellNavigation: false,
+            idProperty: 'col-cuno',
+            paging: true,
+            pagesize: this.pageSize,
+            indeterminate: false,
+            filterable: false,
+            stickyHeader: false,
+            hidePagerOnOnePage: true,
+            rowHeight: 'small',
+            columns: this.dynamicColumns,
+            dataset: this.selectedCustItems,
+            emptyMessage: {
+               title: 'No Order List',
+               icon: 'icon-empty-no-data'
+            }
+         };
+         this.showMatrix = true;
+         this.matrixGridOptions = matrixOptions;
+         //this.updateMatrixGrid();
+      }
+   }
+
+   updateMatrixGrid() {
+      console.log(this.selectedCustItems);
+      this.matrixLineDatagrid ? this.matrixLineDatagrid.dataset = this.selectedCustItems : this.matrixLineDatagrid.dataset = this.selectedCustItems;
+   }
+
+   //Matrix End
+
    private setBusy(isCall: string, isBusy: boolean) {
       if (isCall == "initialData") {
          this.isInitItemBusy = isBusy;
       } else if (isCall == "custData") {
          this.isCustItemBusy = isBusy;
+      } else if (isCall == "itemData") {
+         this.isItemBusy = isBusy;
       }
    }
 

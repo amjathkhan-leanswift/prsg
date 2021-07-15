@@ -236,3 +236,7 @@ h1.headerlabel{
    width:10px !important;
    top:5px !important;
 }
+::ng-deep .datagrid-header th .datagrid-header-text{
+   white-space: pre-wrap !important;
+    line-height: 20px !important;
+}

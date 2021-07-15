@@ -1,11 +1,12 @@
 <div class="row" soho-busyindicator [activated]="isInitChainBusy" [blockUI]="true" [displayDelay]="0">
    <div class="twelve columns">
-      <div class="field-short">
+      <div class="field">
          <select soho-dropdown soho-busyindicator noSearch id="business_chain" name="business_chain"
-            placeholder="Select Business Chain" [(ngModel)]="selectedChain">
+            placeholder="Select Business Chain" [(ngModel)]="selectedChain" *ngIf="!isErrorChain">
             <option value="-1">&nbsp;</option>
             <option *ngFor="let chain of listChainsData" [value]="chain.CUNO">{{chain.CUNO}} - {{chain.CUNM}}</option>
          </select>
+         <p class="errormsg" *ngIf="isErrorChain">No Data Found</p>
       </div>
    </div>
 </div>

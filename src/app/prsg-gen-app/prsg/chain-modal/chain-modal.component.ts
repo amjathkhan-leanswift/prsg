@@ -5,6 +5,8 @@ import {
 import { IMIRequest } from '@infor-up/m3-odin';
 import { MIService } from '@infor-up/m3-odin-angular';
 
+import { GlobalConstants } from '../../global-constants';
+
 @Component({
    selector: 'app-chain-modal',
    templateUrl: './chain-modal.component.html',
@@ -17,6 +19,8 @@ export class ChainModalComponent implements OnInit {
    selectedChain: any;
    getChainsData: any = [];
    listChainsData: any = [];
+
+   isErrorChain: boolean = false;
 
    constructor(
       private miService: MIService
@@ -57,10 +61,17 @@ export class ChainModalComponent implements OnInit {
             }
             //console.log(this.getChainsData);
             this.loadChainDataNames(this.getChainsData);
+            GlobalConstants.chainConfirm = 0;
          })
          .catch(function (error) {
+            GlobalConstants.chainConfirm = 1;
             console.log("Search Business Chain Error", error.errorMessage);
          });
+
+      if (GlobalConstants.chainConfirm == 1) {
+         this.isErrorChain = true;
+         this.setBusy('initialChainData', false);
+      }
    }
 
    async loadChainDataNames(chainDatas) {
@@ -86,6 +97,7 @@ export class ChainModalComponent implements OnInit {
       }
       console.log(this.listChainsData);
       this.setBusy('initialChainData', false);
+
    }
 
    private setBusy(isCall: string, isBusy: boolean) {
