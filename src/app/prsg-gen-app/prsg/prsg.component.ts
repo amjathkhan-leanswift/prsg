@@ -64,6 +64,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    dynamicColumns?: any = [];
    showMatrix: boolean = false;
+   dropUOM?: any = [];
+
 
    constructor(
       private miService: MIService,
@@ -78,7 +80,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.initData();
       this.initCustomerLineGrid();
       this.initItemLineGrid();
-      //this.initMatrixLineGrid();
+      this.initMatrixLineGrid();
    }
 
    onTabActivated(event: any) {
@@ -196,10 +198,18 @@ export class PrsgComponent extends CoreBase implements OnInit {
          stickyHeader: false,
          hidePagerOnOnePage: true,
          rowHeight: 'small',
-         columns: [],
+         editable: true,
+         columns: [
+            {
+               width: 150, id: 'col-cuno', field: 'CUNO', name: 'Customer', resizable: true,
+            },
+            {
+               width: 240, id: 'col-cunm', field: 'CUNM', name: 'Name', resizable: true,
+            }
+         ],
          dataset: [],
          emptyMessage: {
-            title: 'No Order List',
+            title: 'Empty Order List',
             icon: 'icon-empty-no-data'
          }
       };
@@ -392,7 +402,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    //Matrix Start
 
-   genMatrix() {
+   async genMatrix() {
       // console.log("Matrix Click");
       // console.log(this.selectedCustItems);
       // console.log(this.tempSelectedInvItems);
@@ -405,72 +415,150 @@ export class PrsgComponent extends CoreBase implements OnInit {
       } else if (this.selectedInvItems.length == 0) {
          this.showToast("Item Error", "Please Select Items")
       } else {
-         this.dynamicColumns.push(
-            {
-               width: 150, id: 'col-cuno', field: 'CUNO', name: 'Customer', resizable: true,
-            },
-            {
-               width: 240, id: 'col-cunm', field: 'CUNM', name: 'Name', resizable: true,
-            },
-         )
-         this.selectedInvItems.forEach((item: any) => {
-            this.dynamicColumns.push(
-               {
-                  'width': 200,
-                  'id': 'col-' + item.ITNO,
-                  'field': item.ITNO,
-                  'name': item.ITNO + '-' + item.ITDS,
-                  'resizable': true,
-                  'formatter': Soho.Formatters.Decimal,
-                  'validate': 'required',
-                  'editor': Soho.Editors.Input
-               }
-            )
-            this.dynamicColumns.push(
-               {
-                  'width': 60,
-                  'id': 'col-uom-' + item.ITNO,
-                  'field': 'uom-' + item.ITNO,
-                  'name': 'UOM',
-                  'resizable': true,
-                  'validate': 'required',
-                  'editor': Soho.Editors.Input
-               }
-            )
-         });
-         //console.log(this.dynamicColumns);
-
-         const matrixOptions: SohoDataGridOptions = {
-
-            selectable: 'single' as SohoDataGridSelectable,
-            disableRowDeactivation: true,
-            clickToSelect: false,
-            alternateRowShading: false,
-            cellNavigation: false,
-            idProperty: 'col-cuno',
-            paging: true,
-            pagesize: this.pageSize,
-            indeterminate: false,
-            filterable: false,
-            stickyHeader: false,
-            hidePagerOnOnePage: true,
-            rowHeight: 'small',
-            columns: this.dynamicColumns,
-            dataset: this.selectedCustItems,
-            emptyMessage: {
-               title: 'No Order List',
-               icon: 'icon-empty-no-data'
-            }
-         };
-         this.showMatrix = true;
-         this.matrixGridOptions = matrixOptions;
-         //this.updateMatrixGrid();
+         this.setBusy('matrixData', true);
+         await this.loadUOM();
+         await this.loadOrderColumnData();
       }
    }
 
+   async loadUOM() {
+      this.dropUOM = [];
+      for await (const item of this.selectedInvItems) {
+         const inputRecord_item = {
+            ITNO: item.ITNO
+         };
+         const request_item: IMIRequest = {
+            program: 'OIS100MI',
+            transaction: 'LstItmAltQty',
+            record: inputRecord_item,
+            outputFields: ['ALUN', 'AUS2']
+         };
+         await this.miService.execute(request_item)
+            .toPromise()
+            .then((response: any) => {
+               let getUOMData = response.items;
+               let tempDropUOM: any = [];
+               getUOMData.forEach((item_uom: any) => {
+                  tempDropUOM.push({ id: item_uom.ALUN, label: item_uom.ALUN, value: item_uom.ALUN, AUS2: item_uom.AUS2 });
+               });
+               tempDropUOM.forEach(function (item: any, i: any) {
+                  if (item.AUS2 === "1") {
+                     tempDropUOM.splice(i, 1);
+                     tempDropUOM.unshift(item);
+                  }
+               });
+               this.dropUOM.push(tempDropUOM);
+            })
+            .catch(function (error) {
+               console.log("UOM Item Data Error", error.errorMessage);
+            });
+
+      };
+      console.log(this.dropUOM);
+   }
+
+   async loadOrderColumnData() {
+      this.dynamicColumns.push(
+         { width: 150, id: 'col-cuno', field: 'CUNO', name: 'Customer', resizable: true },
+         { width: 240, id: 'col-cunm', field: 'CUNM', name: 'Name', resizable: true }
+      )
+      this.selectedInvItems.forEach((item: any, index: any) => {
+         this.dynamicColumns.push(
+            {
+               width: 200,
+               id: 'col-' + item.ITNO,
+               field: item.ITNO,
+               name: item.ITNO + '-' + item.ITDS,
+               resizable: true,
+               formatter: Soho.Formatters.Decimal,
+               validate: 'required',
+               editor: Soho.Editors.Input
+            }
+         );
+         this.dynamicColumns.push(
+            {
+               width: 60,
+               id: 'col-uom-' + item.ITNO,
+               field: 'UOM-' + item.ITNO,
+               name: 'UOM',
+               resizable: true,
+               validate: 'required',
+               formatter: Soho.Formatters.Dropdown,
+               editor: Soho.Editors.Dropdown,
+               options: this.dropUOM[index]
+            }
+         );
+         this.dynamicColumns.push(
+            {
+               width: 100,
+               id: 'col-price-' + item.ITNO,
+               field: 'PRICE-' + item.ITNO,
+               name: 'Price',
+               resizable: true,
+               formatter: Soho.Formatters.Decimal,
+               validate: 'required',
+               editor: Soho.Editors.Input
+            }
+         );
+      });
+      console.log(this.dynamicColumns);
+
+      const matrixOptions: SohoDataGridOptions = {
+         selectable: 'single' as SohoDataGridSelectable,
+         disableRowDeactivation: false,
+         clickToSelect: false,
+         alternateRowShading: false,
+         actionableMode: true,
+         cellNavigation: true,
+         rowNavigation: true,
+         idProperty: 'col-CUNO',
+         paging: true,
+         pagesize: this.pageSize,
+         indeterminate: false,
+         filterable: false,
+         stickyHeader: false,
+         hidePagerOnOnePage: true,
+         rowHeight: 'small',
+         editable: true,
+         columns: this.dynamicColumns,
+         frozenColumns: {
+            // left: ['col-cuno', 'col-cunm']
+         },
+         emptyMessage: {
+            title: 'Empty Order List',
+            icon: 'icon-empty-no-data'
+         }
+      };
+
+      this.matrixGridOptions = matrixOptions;
+      setTimeout(() => {
+         this.updateMatrixGrid();
+      }, 500);
+   }
+
    updateMatrixGrid() {
-      console.log(this.selectedCustItems);
       this.matrixLineDatagrid ? this.matrixLineDatagrid.dataset = this.selectedCustItems : this.matrixLineDatagrid.dataset = this.selectedCustItems;
+      this.setBusy('matrixData', false);
+   }
+
+   clearAll() {
+
+   }
+
+   onCellChange(event: any) {
+      // console.log(event.row);
+      // console.log(event.rowData);
+      // console.log(event.cell);
+      // console.log(event.value);
+      this.matrixLineDatagrid.updateRow(event.row, event.rowData);
+      let cellNo = event.cell;
+      let cellValue = event.value;
+      console.log(this.matrixLineDatagrid.dataset);
+
+   }
+
+   checkOrder() {
+      this.matrixLineDatagrid.validateAll();
    }
 
    //Matrix End
@@ -482,6 +570,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
          this.isCustItemBusy = isBusy;
       } else if (isCall == "itemData") {
          this.isItemBusy = isBusy;
+      } else if (isCall == "matrixData") {
+         this.isMatrixBusy = isBusy;
       }
    }
 
