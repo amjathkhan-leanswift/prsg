@@ -6,8 +6,11 @@
          <div soho-tabs registerForEvents="activated" (activated)="onTabActivated($event)">
             <div soho-tab-list-container>
                <ul soho-tab-list>
-                  <li soho-tab><a soho-tab-title tabId="tabs-business-chain">Business Chain</a></li>
-                  <li soho-tab><a soho-tab-title tabId="tabs-upload-excel">Upload Excel</a></li>
+                  <li soho-tab><a soho-tab-title tabId="tabs-business-chain" class="fixcenter"><svg soho-icon
+                           icon="cascade-objects"></svg> Business Chain</a></li>
+                  <li soho-tab><a soho-tab-title tabId="tabs-upload-excel" class="fixcenter"><svg soho-icon
+                           icon="tree-xls"></svg> Upload
+                        Excel</a></li>
                </ul>
             </div>
          </div>
@@ -81,8 +84,8 @@
                         <button class="btn-primary btn_width_full btn-normal" type="button" (click)="genMatrix()">Add
                            Orders</button>
 
-                        <button class="btn-primary btn_width_full btn-normal btn-confirm buttondiv_right"
-                           type="button">Generat Order</button>
+                        <button class="btn-primary btn_width_full btn-normal btn-confirm buttondiv_right" type="button"
+                           (click)=genOrder()>Generate Order</button>
                         <button class="btn-primary btn_width_full btn-normal buttondiv_right" type="button"
                            (click)="checkOrder()">Check Order</button>
                      </div>
@@ -107,16 +110,76 @@
 
             <div soho-tab-panel tabId="tabs-upload-excel">
 
-               <div class="field">
-                  <label class="required" for="text-normal-opportunities">Text</label>
-                  <input type="text" name="text-normal-opportunities" id="text-normal-opportunities"
-                     data-validate="required">
+               <div class="row fixcenter">
+                  <div class="three columns">&nbsp;</div>
+                  <div class="six columns">
+                     <fieldset class="myfieldset" aria-labelledby="fieldset-id">
+                        <legend id="fieldset-id">Order Header</legend>
+                        <div class="row">
+                           <div class="six columns">
+                              <div class="field">
+                                 <label for="facility" class="label">Facility</label>
+                                 <select soho-dropdown soho-busyindicator noSearch id="facility" name="facility"
+                                    placeholder="Select Facility">
+                                    <option value="-1">&nbsp;</option>
+                                 </select>
+                              </div>
+                              <div class="field">
+                                 <label for="order-type" class="label">Order Type</label>
+                                 <select soho-dropdown soho-busyindicator noSearch id="order-type" name="order-type"
+                                    placeholder="Select Order Type">
+                                    <option value="-1">&nbsp;</option>
+                                 </select>
+                              </div>
+                              <div class="field">
+                                 <label for="customer" class="label">Customer</label>
+                                 <input type="text" id="customer" name="customer" />
+                              </div>
+                           </div>
+                           <div class="six columns">
+                              <div class="field">
+                                 <label for="whlo" class="label">Delivery Warehouse</label>
+                                 <select soho-dropdown soho-busyindicator noSearch id="whlo" name="whlo"
+                                    placeholder="Select Warehouse">
+                                    <option value="-1">&nbsp;</option>
+                                 </select>
+                              </div>
+                              <div class="field">
+                                 <label for="delivery-date" class="label">Delivery Date</label>
+                                 <input soho-datepicker id="delivery-date" name="delivery-date"
+                                    [options]="datePickerOptions" placeholder="Select Delivery Date" />
+                              </div>
+                              <div class="field">
+                                 <label for="sales-rep" class="label">Sales Rep</label>
+                                 <input type="text" id="sales-rep" name="sales-rep" />
+                              </div>
+                           </div>
+                        </div>
+                     </fieldset>
+                  </div>
+                  <div class="three columns">
+                     <div class="btn_all">
+                        <button class="btn-primary btn_width_full btn-normal" type="button">Upload Excel</button>
+                        <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button">Cancel
+                           Order</button>
+                        <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button">Create
+                           Order</button>
+                     </div>
+                  </div>
                </div>
-               <div class="field">
-                  <label class="required" for="tel-normal-opportunities">Telephone</label>
-                  <input type="tel" name="tel-normal-opportunities" id="tel-normal-opportunities"
-                     data-validate="required" aria-required="true">
+
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="card cardpad">
+                        <div #itemExcelLineDatagrid soho-datagrid [gridOptions]="itemExcelGridOptions"
+                           soho-busyindicator [activated]="isItemExcelBusy" [blockUI]="true" [displayDelay]="0"
+                           (selected)="onSelectedInvItem($event.rows)">
+                        </div>
+                     </div>
+                  </div>
                </div>
+
+
             </div>
          </div>
 

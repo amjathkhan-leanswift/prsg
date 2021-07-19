@@ -1,0 +1,33 @@
+<div class="row">
+   <div class="twelve columns">
+      <div class="field">
+         <label for="facility" class="label">Facility</label>
+         <select soho-dropdown soho-busyindicator noSearch id="facility" name="facility" placeholder="Select Facility">
+            <option value="-1">&nbsp;</option>
+         </select>
+      </div>
+      <div class="field">
+         <label for="order-type" class="label">Order Type</label>
+         <select soho-dropdown soho-busyindicator noSearch id="order-type" name="order-type"
+            placeholder="Select Order Type">
+            <option value="-1">&nbsp;</option>
+         </select>
+      </div>
+      <div class="field">
+         <label for="whlo" class="label">Delivery Warehouse</label>
+         <select soho-dropdown soho-busyindicator noSearch id="whlo" name="whlo" placeholder="Select Warehouse">
+            <option value="-1">&nbsp;</option>
+         </select>
+      </div>
+      <div class="field createbusiness">
+         <label for="delivery-date" class="label">Delivery Date</label>
+         <input soho-datepicker id="delivery-date" name="delivery-date" [options]="datePickerOptions"
+            placeholder="Select Delivery Date" />
+      </div>
+      <div class="field">
+         <label for="sales-rep" class="label">Sales Rep</label>
+         <input type="text" id="sales-rep" name="sales-rep" />
+      </div>
+
+   </div>
+</div>

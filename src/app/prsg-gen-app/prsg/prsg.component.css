@@ -240,3 +240,40 @@ h1.headerlabel{
    white-space: pre-wrap !important;
     line-height: 20px !important;
 }
+.fixcenter{
+   display: flex;
+   align-items: center;
+}
+.fixcenter svg{
+   margin-right: 5px;
+}
+::ng-deep .datepicker {
+   width: 300px !important;
+    max-width: 100%;
+}
+
+.btn_all{
+   border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    padding: 20px;
+    max-width: 200px;
+}
+.btn_all .btn-normal{
+   margin-right: 0px;
+   margin-bottom: 10px;
+}
+.btn_all .btn-normal:last-child{
+   margin-bottom: 0px;
+}
+.myfieldset{
+   border: 1px solid #ddd;
+   padding: 15px 30px;
+   padding-right: 0px;
+   width: auto;
+   margin-bottom: 20px;
+}
+fieldset > legend, .fieldset > legend{
+   padding: 10px 15px;
+}

@@ -26,6 +26,7 @@ import { DecimalPipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
 
 import { ChainModalComponent } from './chain-modal/chain-modal.component'
+import { CreateModalComponent } from './create-modal/create-modal.component';
 
 @Component({
    selector: 'app-prsg',
@@ -51,6 +52,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
    matrixGridOptions: SohoDataGridOptions;
    isMatrixBusy: boolean = false;
 
+   @ViewChild('itemExcelLineDatagrid') itemExcelLineDatagrid: SohoDataGridComponent;
+   itemExcelGridOptions: SohoDataGridOptions;
+   isItemExcelBusy: boolean = false;
+
    pageSize = 10;
    businessChainText: any;
    customerData: any = [];
@@ -67,6 +72,11 @@ export class PrsgComponent extends CoreBase implements OnInit {
    dropUOM?: any = [];
 
 
+   public datePickerOptions: SohoDatePickerOptions = {
+      mode: 'standard',
+      dateFormat: 'yyyyMMdd'
+   }
+
    constructor(
       private miService: MIService,
       private toastService: SohoToastService,
@@ -81,6 +91,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.initCustomerLineGrid();
       this.initItemLineGrid();
       this.initMatrixLineGrid();
+      this.initItemExcelLineGrid();
    }
 
    onTabActivated(event: any) {
@@ -214,6 +225,62 @@ export class PrsgComponent extends CoreBase implements OnInit {
          }
       };
       this.matrixGridOptions = matrixOptions;
+   }
+
+   initItemExcelLineGrid() {
+      const itemExcelOptions: SohoDataGridOptions = {
+         selectable: 'multiple' as SohoDataGridSelectable,
+         disableRowDeactivation: false,
+         clickToSelect: false,
+         alternateRowShading: false,
+         cellNavigation: true,
+         idProperty: 'col-itno',
+         paging: true,
+         pagesize: this.pageSize,
+         indeterminate: false,
+         filterable: true,
+         stickyHeader: false,
+         hidePagerOnOnePage: true,
+         rowHeight: 'small',
+         editable: true,
+         columns: [
+            {
+               width: '5%', id: 'selectionCheckbox', sortable: false,
+               resizable: false, align: 'center', formatter: Soho.Formatters.SelectionCheckbox
+            },
+            {
+               width: '15%', id: 'col-itno', field: 'ITNO', name: 'Item',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '65%', id: 'col-itds', field: 'ITDS', name: 'Name',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-stat', field: 'STAT', name: 'Status',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-qty', field: 'QTY', name: 'Quantity',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-uom', field: 'UOM', name: 'UOM',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-price', field: 'PRICE', name: 'PRICE',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            }
+         ],
+         dataset: [],
+         // toolbar: { title: 'Customer List', actions: true, results: true, personalize: true, exportToExcel: true },
+         emptyMessage: {
+            title: 'Empty Item List',
+            icon: 'icon-empty-no-data'
+         }
+      };
+      this.itemExcelGridOptions = itemExcelOptions;
    }
 
    initData() {
@@ -559,6 +626,32 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    checkOrder() {
       this.matrixLineDatagrid.validateAll();
+   }
+
+   genOrder() {
+      const dialog = this.modalDialog.modal(CreateModalComponent);
+
+      dialog.buttons([
+         {
+            text: 'Cancel',
+            click: () => dialog.close()
+         },
+         {
+            text: 'Create Order',
+            isDefault: true,
+            click: () => dialog.close(true)
+         }
+      ])
+
+         .title(`Create Order`)
+         .apply((comp: CreateModalComponent) => {
+
+         })
+         .open()
+         .afterClose((result) => {
+            if (result) {
+            }
+         });
    }
 
    //Matrix End

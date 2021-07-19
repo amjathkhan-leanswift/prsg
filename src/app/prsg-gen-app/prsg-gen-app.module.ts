@@ -9,13 +9,15 @@ import { PrsgGenAppRoutingModule } from './prsg-gen-app-routing.module';
 import { PrsgGenAppComponent } from './prsg-gen-app.component';
 import { PrsgComponent } from './prsg/prsg.component';
 import { ChainModalComponent } from './prsg/chain-modal/chain-modal.component';
+import { CreateModalComponent } from './prsg/create-modal/create-modal.component';
 
 
 @NgModule({
    declarations: [
       PrsgGenAppComponent,
       PrsgComponent,
-      ChainModalComponent
+      ChainModalComponent,
+      CreateModalComponent
    ],
    imports: [
       CommonModule,
