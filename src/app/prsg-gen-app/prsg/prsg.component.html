@@ -111,7 +111,7 @@
             <div soho-tab-panel tabId="tabs-upload-excel">
 
                <div class="row fixcenter">
-                  <div class="three columns">&nbsp;</div>
+                  <!-- <div class="three columns">&nbsp;</div> -->
                   <div class="six columns">
                      <fieldset class="myfieldset" aria-labelledby="fieldset-id">
                         <legend id="fieldset-id">Order Header</legend>
@@ -158,12 +158,19 @@
                      </fieldset>
                   </div>
                   <div class="three columns">
-                     <div class="btn_all">
+                     <div class="upload_left">
+                        <div class="field">
+                           <label soho-label for="uploadexcel">Select File - {{fileLimits}}</label>
+                           <input soho-fileupload id="uploadexcel" name=uploadexcel accept="{{fileLimits}}"
+                              (change)="onExcelChange($event)" />
+                        </div>
                         <button class="btn-primary btn_width_full btn-normal" type="button">Upload Excel</button>
-                        <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button">Cancel
-                           Order</button>
-                        <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button">Create
-                           Order</button>
+                        <div class="all_create">
+                           <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button">Cancel
+                              Order</button>
+                           <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button">Create
+                              Order</button>
+                        </div>
                      </div>
                   </div>
                </div>

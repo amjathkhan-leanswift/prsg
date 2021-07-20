@@ -277,3 +277,19 @@ h1.headerlabel{
 fieldset > legend, .fieldset > legend{
    padding: 10px 15px;
 }
+
+.upload_left{
+   border: 1px solid #ddd;
+   padding: 20px;
+   position: relative;
+   min-height: 280px;
+}
+.all_create{
+   margin-top: 20px;
+   border-top: 1px solid #ddd;
+   max-width:300px;
+   width:100%;
+    padding-top: 20px;
+    position:absolute;
+    bottom:20px;
+}

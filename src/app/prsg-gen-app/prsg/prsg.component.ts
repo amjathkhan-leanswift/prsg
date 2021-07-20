@@ -17,7 +17,8 @@ import {
    SohoMessageService,
    SohoMessageRef,
    SohoAutoCompleteComponent,
-   SohoModalDialogService, SohoModalDialogRef
+   SohoModalDialogService, SohoModalDialogRef,
+   SohoFileUploadComponent, SohoTrackDirtyDirective
 } from 'ids-enterprise-ng';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -71,6 +72,18 @@ export class PrsgComponent extends CoreBase implements OnInit {
    showMatrix: boolean = false;
    dropUOM?: any = [];
 
+   @ViewChild(SohoFileUploadComponent, { static: true }) fileupload?: SohoFileUploadComponent;
+   @ViewChild('trackDirty', { static: true }) trackdirty?: SohoTrackDirtyDirective;
+
+   public fileLimits = '.xls,.xlsx';
+   public fileUploadDisabled = false;
+   public fileUploadReadOnly = false;
+   public fileUploadOptions = {
+      attributes: {
+         name: 'data-automation-id',
+         value: 'fileupload-field-automation-id'
+      }
+   };
 
    public datePickerOptions: SohoDatePickerOptions = {
       mode: 'standard',
@@ -655,6 +668,14 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
 
    //Matrix End
+
+   //Upload Excel start
+
+   onExcelChange(event: any) {
+      console.log('onChange', event);
+   }
+
+   //UPload Excel End
 
    private setBusy(isCall: string, isBusy: boolean) {
       if (isCall == "initialData") {
