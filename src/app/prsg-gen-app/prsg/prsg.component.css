@@ -293,3 +293,24 @@ fieldset > legend, .fieldset > legend{
     position:absolute;
     bottom:20px;
 }
+.additemdiv{
+   display: flex;
+    align-items: flex-end;
+    min-height: 300px;
+    justify-content: flex-end;
+}
+.itembottom{
+   display: flex;
+   align-items: center;
+}
+.field.single-line-field{
+   display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.field.single-line-field label{
+   width:140px;
+   font-weight: 600;
+   font-size: 1.4rem;
+}

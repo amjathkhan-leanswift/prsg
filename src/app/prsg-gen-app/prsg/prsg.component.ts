@@ -84,6 +84,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
          value: 'fileupload-field-automation-id'
       }
    };
+   itemText1: any;
 
    public datePickerOptions: SohoDatePickerOptions = {
       mode: 'standard',
