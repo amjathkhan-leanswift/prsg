@@ -119,16 +119,20 @@
                            <div class="six columns">
                               <div class="field">
                                  <label for="facility" class="label">Facility</label>
-                                 <select soho-dropdown soho-busyindicator noSearch id="facility" name="facility"
+                                 <select soho-dropdown soho-busyindicator id="facility" name="facility"
                                     placeholder="Select Facility">
                                     <option value="-1">&nbsp;</option>
+                                    <option *ngFor="let faci of listFaciData" [value]="faci.FACI">{{faci.FACI}} -
+                                       {{faci.FACN}}</option>
                                  </select>
                               </div>
                               <div class="field">
                                  <label for="order-type" class="label">Order Type</label>
-                                 <select soho-dropdown soho-busyindicator noSearch id="order-type" name="order-type"
+                                 <select soho-dropdown soho-busyindicator id="order-type" name="order-type"
                                     placeholder="Select Order Type">
                                     <option value="-1">&nbsp;</option>
+                                    <option *ngFor="let ordData of listOrderData" [value]="ordData.ORTP">
+                                       {{ordData.ORTP}} - {{ordData.TX40}}
                                  </select>
                               </div>
                               <div class="field">
@@ -139,9 +143,11 @@
                            <div class="six columns">
                               <div class="field">
                                  <label for="whlo" class="label">Delivery Warehouse</label>
-                                 <select soho-dropdown soho-busyindicator noSearch id="whlo" name="whlo"
+                                 <select soho-dropdown soho-busyindicator id="whlo" name="whlo"
                                     placeholder="Select Warehouse">
                                     <option value="-1">&nbsp;</option>
+                                    <option *ngFor="let whData of listWareHouseData" [value]="whData.WHLO">
+                                       {{whData.WHLO}} - {{whData.WHNM}}
                                  </select>
                               </div>
                               <div class="field">

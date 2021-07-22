@@ -91,6 +91,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
       dateFormat: 'yyyyMMdd'
    }
 
+   listFaciData: any = [];
+   listOrderData: any = [];
+   listWareHouseData: any = [];
+
    constructor(
       private miService: MIService,
       private toastService: SohoToastService,
@@ -196,6 +200,14 @@ export class PrsgComponent extends CoreBase implements OnInit {
             {
                width: '15%', id: 'col-stat', field: 'STAT', name: 'Status',
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-itty', field: 'ITTY', name: 'Type',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+            },
+            {
+               width: '15%', id: 'col-itgr', field: 'ITGR', name: 'Group',
+               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             }
          ],
          dataset: [],
@@ -297,8 +309,11 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.itemExcelGridOptions = itemExcelOptions;
    }
 
-   initData() {
+   async initData() {
       this.setBusy('initialData', true);
+      await this.initListFacility();
+      await this.initLstOrderTypes();
+      await this.initLstWarehouses();
       this.setBusy('initialData', false);
    }
 
@@ -420,8 +435,9 @@ export class PrsgComponent extends CoreBase implements OnInit {
    async searchItemData() {
       this.setBusy('itemData', true);
       this.itemData = [];
+      let term_temp = '((ITNO:' + this.itemText + '*) OR (ITNO:' + this.itemText + ') OR (ITDS:' + this.itemText + '*) OR (ITDS:' + this.itemText + '))';
       const inputRecord_item = {
-         SQRY: this.itemText
+         SQRY: term_temp
       };
       const request_item: IMIRequest = {
          program: 'MMS200MI',
@@ -441,6 +457,39 @@ export class PrsgComponent extends CoreBase implements OnInit {
             console.log("Item Data Error", error.errorMessage);
          });
       // console.log(this.itemData);
+
+      this.itemDataList();
+   }
+   async itemDataList() {
+      if (this.itemData.length > 0) {
+         let i = 0;
+
+         for await (const item of this.itemData) {
+            const inputRecord_itemdata = {
+               ITNO: item.ITNO
+            };
+            const request_itemdata: IMIRequest = {
+               program: 'MMS200MI',
+               transaction: 'GetItmBasic',
+               record: inputRecord_itemdata,
+               outputFields: ['ITTY', 'ITGR']
+            };
+            await this.miService.execute(request_itemdata)
+               .toPromise()
+               .then((response: any) => {
+                  let getItemData = response.items;
+                  getItemData.forEach((itemDetail: any) => {
+                     this.itemData[i].ITTY = itemDetail.ITTY;
+                     this.itemData[i].ITGR = itemDetail.ITGR;
+                  });
+                  i++;
+               })
+               .catch(function (error) {
+                  console.log("Item Data Error", error.errorMessage);
+               });
+         };
+      };
+      //console.log(this.itemData);
       this.updateItemList();
       this.setBusy('itemData', false);
    }
@@ -671,6 +720,63 @@ export class PrsgComponent extends CoreBase implements OnInit {
    //Matrix End
 
    //Upload Excel start
+
+   async initListFacility() {
+      this.listFaciData = [];
+      const request_faci: IMIRequest = {
+         program: 'CRS008MI',
+         transaction: 'ListFacility',
+         outputFields: ['FACI', 'FACN']
+      };
+
+      await this.miService.execute(request_faci)
+         .toPromise()
+         .then((response: any) => {
+            // console.log(response.items);
+            this.listFaciData = response.items;
+         })
+         .catch(function (error) {
+            console.log("List Facility Error", error.errorMessage);
+         });
+   }
+
+   async initLstOrderTypes() {
+      this.listOrderData = [];
+      const request: IMIRequest = {
+         program: 'OIS010MI',
+         transaction: 'LstOrderTypes',
+         outputFields: ['ORTP', 'TX40']
+      };
+
+      await this.miService.execute(request)
+         .toPromise()
+         .then((response: any) => {
+            // console.log(response.items);
+            this.listOrderData = response.items;
+         })
+         .catch(function (error) {
+            console.log("List Order Data Error", error.errorMessage);
+         });
+   }
+
+   async initLstWarehouses() {
+      this.listWareHouseData = [];
+      const request: IMIRequest = {
+         program: 'MMS005MI',
+         transaction: 'LstWarehouses',
+         outputFields: ['WHLO', 'WHNM']
+      };
+
+      await this.miService.execute(request)
+         .toPromise()
+         .then((response: any) => {
+            // console.log(response.items);
+            this.listWareHouseData = response.items;
+         })
+         .catch(function (error) {
+            console.log("List Order Data Error", error.errorMessage);
+         });
+   }
 
    onExcelChange(event: any) {
       console.log('onChange', event);
