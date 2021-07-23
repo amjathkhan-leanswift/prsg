@@ -21,6 +21,23 @@ export class CreateModalComponent implements OnInit {
    listFaciData: any = [];
    listOrderData: any = [];
    listWareHouseData: any = [];
+   listSalesRep: any = [];
+   maxRecords = 10000;
+
+   saleRepTemplate = `<script type="text/html">
+      <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
+         <a tabindex="-1">
+            <span class="display-value">{{{label}}} - {{{tx40}}}</span>
+            <!--span class="display-value display-newline"></span-->
+         </a>
+      </li>
+      </script>`;
+
+   dataFacility?: any;
+   dataOrderType?: any;
+   dataWarehouse?: any;
+   dataDeliveryDate?: any;
+   dataSalesRep?: any;
 
    constructor(
       private miService: MIService
@@ -35,6 +52,7 @@ export class CreateModalComponent implements OnInit {
       await this.initListFacility();
       await this.initLstOrderTypes();
       await this.initLstWarehouses();
+      await this.initSalesRep();
       this.setBusy('initialData', false);
    }
 
@@ -43,7 +61,8 @@ export class CreateModalComponent implements OnInit {
       const request_faci: IMIRequest = {
          program: 'CRS008MI',
          transaction: 'ListFacility',
-         outputFields: ['FACI', 'FACN']
+         outputFields: ['FACI', 'FACN'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request_faci)
@@ -62,7 +81,8 @@ export class CreateModalComponent implements OnInit {
       const request: IMIRequest = {
          program: 'OIS010MI',
          transaction: 'LstOrderTypes',
-         outputFields: ['ORTP', 'TX40']
+         outputFields: ['ORTP', 'TX40'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request)
@@ -81,7 +101,8 @@ export class CreateModalComponent implements OnInit {
       const request: IMIRequest = {
          program: 'MMS005MI',
          transaction: 'LstWarehouses',
-         outputFields: ['WHLO', 'WHNM']
+         outputFields: ['WHLO', 'WHNM'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request)
@@ -93,6 +114,37 @@ export class CreateModalComponent implements OnInit {
          .catch(function (error) {
             console.log("List Order Data Error", error.errorMessage);
          });
+   }
+
+   async initSalesRep() {
+      this.listSalesRep = [];
+      const request: IMIRequest = {
+         program: 'CRS100MI',
+         transaction: 'List',
+         outputFields: ['SMCD', 'TX40'],
+         maxReturnedRecords: this.maxRecords
+      };
+
+      await this.miService.execute(request)
+         .toPromise()
+         .then((response: any) => {
+            // console.log(response.items);
+            let templistSalesRep = response.items;
+            templistSalesRep.forEach((item: any) => {
+               this.listSalesRep.push({ 'label': item.SMCD + ' - ' + item.TX40, 'smcd': item.SMCD, 'value': item.SMCD + ' - ' + item.TX40 });
+            });
+         })
+         .catch(function (error) {
+            console.log("List Sales Rep Data Error", error.errorMessage);
+         });
+   }
+
+   public listSalesRepSource = (term: string, response: any) => {
+      response(term, this.listSalesRep);
+   }
+
+   onSelectedSalesRep(event: any) {
+      this.dataSalesRep = event[2].smcd;
    }
 
    private setBusy(isCall: string, isBusy: boolean) {

@@ -40,6 +40,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    placeholder?: ViewContainerRef;
 
    isInitItemBusy: boolean = false;
+   maxRecords = 10000
 
    @ViewChild('customerLineDatagrid') customerLineDatagrid: SohoDataGridComponent;
    customerGridOptions: SohoDataGridOptions;
@@ -91,9 +92,25 @@ export class PrsgComponent extends CoreBase implements OnInit {
       dateFormat: 'yyyyMMdd'
    }
 
-   listFaciData: any = [];
-   listOrderData: any = [];
-   listWareHouseData: any = [];
+   excellistFaciData: any = [];
+   excellistOrderData: any = [];
+   excellistWareHouseData: any = [];
+   excellistSalesRep: any = [];
+
+   excelsaleRepTemplate = `<script type="text/html">
+      <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
+         <a tabindex="-1">
+            <span class="display-value">{{{label}}} - {{{tx40}}}</span>
+            <!--span class="display-value display-newline"></span-->
+         </a>
+      </li>
+      </script>`;
+
+   exceldataFacility?: any;
+   exceldataOrderType?: any;
+   exceldataWarehouse?: any;
+   exceldataDeliveryDate?: any;
+   exceldataSalesRep?: any;
 
    constructor(
       private miService: MIService,
@@ -311,9 +328,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    async initData() {
       this.setBusy('initialData', true);
-      await this.initListFacility();
-      await this.initLstOrderTypes();
-      await this.initLstWarehouses();
+      await this.excelinitListFacility();
+      await this.excelinitLstOrderTypes();
+      await this.excelinitLstWarehouses();
+      await this.excelinitSalesRep();
       this.setBusy('initialData', false);
    }
 
@@ -371,7 +389,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
          program: 'OIS040MI',
          transaction: 'LstBusChainCust',
          record: inputRecord_chain,
-         outputFields: ['CUNO']
+         outputFields: ['CUNO'],
+         maxReturnedRecords: this.maxRecords
       };
       await this.miService.execute(request_chain)
          .toPromise()
@@ -396,7 +415,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
             program: 'CRS610MI',
             transaction: 'GetBasicData',
             record: inputRecord_chain,
-            outputFields: ['CUNO', 'CUNM', 'CUA1', 'CUA2', 'TOWN']
+            outputFields: ['CUNO', 'CUNM', 'CUA1', 'CUA2', 'TOWN'],
+            maxReturnedRecords: this.maxRecords
          };
          await this.miService.execute(request_chain)
             .toPromise()
@@ -409,7 +429,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
             });
       }
       console.log(this.customerData);
-      this.customerLineDatagrid.toolbar = { 'title': this.chainTitle + ' - Customer List' };
+      this.customerLineDatagrid.toolbar = { 'title': this.chainTitle + ' - Customer List', actions: true, results: true, personalize: true, exportToExcel: true };
       this.updateCustomerList();
       this.setBusy('custData', false);
    }
@@ -439,26 +459,36 @@ export class PrsgComponent extends CoreBase implements OnInit {
       const inputRecord_item = {
          SQRY: term_temp
       };
+      // const request_item: IMIRequest = {
+      //    program: 'MMS200MI',
+      //    transaction: 'SearchItem',
+      //    record: inputRecord_item,
+      //    outputFields: ['ITNO', 'ITDS', 'STAT'],
+      //    maxReturnedRecords: this.maxRecords
+      // };
       const request_item: IMIRequest = {
-         program: 'MMS200MI',
-         transaction: 'SearchItem',
+         program: 'MDBREADMI',
+         transaction: 'SelMITMAS00IES',
          record: inputRecord_item,
-         outputFields: ['ITNO', 'ITDS', 'STAT']
+         outputFields: ['ITNO', 'ITDS', 'STAT', 'ITTY', 'ITGR'],
+         maxReturnedRecords: this.maxRecords
       };
       await this.miService.execute(request_item)
          .toPromise()
          .then((response: any) => {
             let getItemData = response.items;
             getItemData.forEach((item: any) => {
-               this.itemData.push({ 'ITNO': item.ITNO, 'ITDS': item.ITDS, 'STAT': item.STAT });
+               this.itemData.push({ 'ITNO': item.ITNO, 'ITDS': item.ITDS, 'STAT': item.STAT, 'ITTY': item.ITTY, 'ITGR': item.ITGR });
             });
          })
          .catch(function (error) {
             console.log("Item Data Error", error.errorMessage);
          });
       // console.log(this.itemData);
+      this.updateItemList();
+      this.setBusy('itemData', false);
 
-      this.itemDataList();
+      //this.itemDataList();
    }
    async itemDataList() {
       if (this.itemData.length > 0) {
@@ -472,7 +502,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
                program: 'MMS200MI',
                transaction: 'GetItmBasic',
                record: inputRecord_itemdata,
-               outputFields: ['ITTY', 'ITGR']
+               outputFields: ['ITTY', 'ITGR'],
+               maxReturnedRecords: this.maxRecords
             };
             await this.miService.execute(request_itemdata)
                .toPromise()
@@ -533,10 +564,6 @@ export class PrsgComponent extends CoreBase implements OnInit {
    //Matrix Start
 
    async genMatrix() {
-      // console.log("Matrix Click");
-      // console.log(this.selectedCustItems);
-      // console.log(this.tempSelectedInvItems);
-      // console.log(this.selectedInvItems);
 
       this.dynamicColumns = [];
 
@@ -561,7 +588,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
             program: 'OIS100MI',
             transaction: 'LstItmAltQty',
             record: inputRecord_item,
-            outputFields: ['ALUN', 'AUS2']
+            outputFields: ['ALUN', 'AUS2'],
+            maxReturnedRecords: this.maxRecords
          };
          await this.miService.execute(request_item)
             .toPromise()
@@ -601,7 +629,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
                name: item.ITNO + '-' + item.ITDS,
                resizable: true,
                formatter: Soho.Formatters.Decimal,
-               validate: 'required',
+               // validate: 'required',
                editor: Soho.Editors.Input
             }
          );
@@ -612,7 +640,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
                field: 'UOM-' + item.ITNO,
                name: 'UOM',
                resizable: true,
-               validate: 'required',
+               // validate: 'required',
                formatter: Soho.Formatters.Dropdown,
                editor: Soho.Editors.Dropdown,
                options: this.dropUOM[index]
@@ -626,7 +654,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
                name: 'Price',
                resizable: true,
                formatter: Soho.Formatters.Decimal,
-               validate: 'required',
+               // validate: 'required',
                editor: Soho.Editors.Input
             }
          );
@@ -687,13 +715,13 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    }
 
-   checkOrder() {
-      this.matrixLineDatagrid.validateAll();
-   }
+   // checkOrder() {
+   //    this.matrixLineDatagrid.validateAll();
+   // }
 
    genOrder() {
       const dialog = this.modalDialog.modal(CreateModalComponent);
-
+      let dialogComponent: CreateModalComponent;
       dialog.buttons([
          {
             text: 'Cancel',
@@ -708,11 +736,17 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
          .title(`Create Order`)
          .apply((comp: CreateModalComponent) => {
-
+            dialogComponent = comp;
          })
          .open()
          .afterClose((result) => {
             if (result) {
+               console.log("modal data");
+               console.log(dialogComponent.dataFacility);
+               console.log(dialogComponent.dataOrderType);
+               console.log(dialogComponent.dataWarehouse);
+               console.log(dialogComponent.dataDeliveryDate);
+               console.log(dialogComponent.dataSalesRep);
             }
          });
    }
@@ -721,62 +755,97 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    //Upload Excel start
 
-   async initListFacility() {
-      this.listFaciData = [];
+   async excelinitListFacility() {
+      this.excellistFaciData = [];
       const request_faci: IMIRequest = {
          program: 'CRS008MI',
          transaction: 'ListFacility',
-         outputFields: ['FACI', 'FACN']
+         outputFields: ['FACI', 'FACN'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request_faci)
          .toPromise()
          .then((response: any) => {
             // console.log(response.items);
-            this.listFaciData = response.items;
+            this.excellistFaciData = response.items;
          })
          .catch(function (error) {
             console.log("List Facility Error", error.errorMessage);
          });
    }
 
-   async initLstOrderTypes() {
-      this.listOrderData = [];
+   async excelinitLstOrderTypes() {
+      this.excellistOrderData = [];
       const request: IMIRequest = {
          program: 'OIS010MI',
          transaction: 'LstOrderTypes',
-         outputFields: ['ORTP', 'TX40']
+         outputFields: ['ORTP', 'TX40'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request)
          .toPromise()
          .then((response: any) => {
             // console.log(response.items);
-            this.listOrderData = response.items;
+            this.excellistOrderData = response.items;
          })
          .catch(function (error) {
             console.log("List Order Data Error", error.errorMessage);
          });
    }
 
-   async initLstWarehouses() {
-      this.listWareHouseData = [];
+   async excelinitLstWarehouses() {
+      this.excellistWareHouseData = [];
       const request: IMIRequest = {
          program: 'MMS005MI',
          transaction: 'LstWarehouses',
-         outputFields: ['WHLO', 'WHNM']
+         outputFields: ['WHLO', 'WHNM'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request)
          .toPromise()
          .then((response: any) => {
             // console.log(response.items);
-            this.listWareHouseData = response.items;
+            this.excellistWareHouseData = response.items;
          })
          .catch(function (error) {
             console.log("List Order Data Error", error.errorMessage);
          });
    }
+
+   async excelinitSalesRep() {
+      this.excellistSalesRep = [];
+      const request: IMIRequest = {
+         program: 'CRS100MI',
+         transaction: 'List',
+         outputFields: ['SMCD', 'TX40'],
+         maxReturnedRecords: this.maxRecords
+      };
+
+      await this.miService.execute(request)
+         .toPromise()
+         .then((response: any) => {
+            // console.log(response.items);
+            let templistSalesRep = response.items;
+            templistSalesRep.forEach((item: any) => {
+               this.excellistSalesRep.push({ 'label': item.SMCD + ' - ' + item.TX40, 'smcd': item.SMCD, 'value': item.SMCD + ' - ' + item.TX40 });
+            });
+         })
+         .catch(function (error) {
+            console.log("List Sales Rep Data Error", error.errorMessage);
+         });
+   }
+
+   public excellistSalesRepSource = (term: string, response: any) => {
+      response(term, this.excellistSalesRep);
+   }
+
+   onSelectedSalesRepExcel(event: any) {
+      this.exceldataSalesRep = event[2].smcd;
+   }
+
 
    onExcelChange(event: any) {
       console.log('onChange', event);

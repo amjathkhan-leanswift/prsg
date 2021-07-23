@@ -21,6 +21,7 @@ export class ChainModalComponent implements OnInit {
    listChainsData: any = [];
 
    isErrorChain: boolean = false;
+   maxRecords = 10000;
 
    constructor(
       private miService: MIService
@@ -39,7 +40,8 @@ export class ChainModalComponent implements OnInit {
          program: 'OIS040MI',
          transaction: 'GetBusChain',
          record: inputRecord_chain,
-         outputFields: ['CHL1', 'CHL2', 'CHL3', 'CHL4']
+         outputFields: ['CHL1', 'CHL2', 'CHL3', 'CHL4'],
+         maxReturnedRecords: this.maxRecords
       };
 
       await this.miService.execute(request_chain)
@@ -83,7 +85,8 @@ export class ChainModalComponent implements OnInit {
             program: 'CRS610MI',
             transaction: 'GetBasicData',
             record: inputRecord_chain_data,
-            outputFields: ['CUNO', 'CUNM']
+            outputFields: ['CUNO', 'CUNM'],
+            maxReturnedRecords: this.maxRecords
          };
          await this.miService.execute(request_chain_data)
             .toPromise()

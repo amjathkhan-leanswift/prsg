@@ -86,8 +86,8 @@
 
                         <button class="btn-primary btn_width_full btn-normal btn-confirm buttondiv_right" type="button"
                            (click)=genOrder()>Generate Order</button>
-                        <button class="btn-primary btn_width_full btn-normal buttondiv_right" type="button"
-                           (click)="checkOrder()">Check Order</button>
+                        <!-- <button class="btn-primary btn_width_full btn-normal buttondiv_right" type="button"
+                           (click)="checkOrder()">Check Order</button> -->
                      </div>
                   </div>
                </div>
@@ -120,18 +120,18 @@
                               <div class="field">
                                  <label for="facility" class="label">Facility</label>
                                  <select soho-dropdown soho-busyindicator id="facility" name="facility"
-                                    placeholder="Select Facility">
+                                    placeholder="Select Facility" [(ngModel)]="exceldataFacility">
                                     <option value="-1">&nbsp;</option>
-                                    <option *ngFor="let faci of listFaciData" [value]="faci.FACI">{{faci.FACI}} -
+                                    <option *ngFor="let faci of excellistFaciData" [value]="faci.FACI">{{faci.FACI}} -
                                        {{faci.FACN}}</option>
                                  </select>
                               </div>
                               <div class="field">
                                  <label for="order-type" class="label">Order Type</label>
                                  <select soho-dropdown soho-busyindicator id="order-type" name="order-type"
-                                    placeholder="Select Order Type">
+                                    placeholder="Select Order Type" [(ngModel)]="exceldataOrderType">
                                     <option value="-1">&nbsp;</option>
-                                    <option *ngFor="let ordData of listOrderData" [value]="ordData.ORTP">
+                                    <option *ngFor="let ordData of excellistOrderData" [value]="ordData.ORTP">
                                        {{ordData.ORTP}} - {{ordData.TX40}}
                                  </select>
                               </div>
@@ -144,20 +144,24 @@
                               <div class="field">
                                  <label for="whlo" class="label">Delivery Warehouse</label>
                                  <select soho-dropdown soho-busyindicator id="whlo" name="whlo"
-                                    placeholder="Select Warehouse">
+                                    placeholder="Select Warehouse" [(ngModel)]="exceldataWarehouse">
                                     <option value="-1">&nbsp;</option>
-                                    <option *ngFor="let whData of listWareHouseData" [value]="whData.WHLO">
+                                    <option *ngFor="let whData of excellistWareHouseData" [value]="whData.WHLO">
                                        {{whData.WHLO}} - {{whData.WHNM}}
                                  </select>
                               </div>
                               <div class="field">
                                  <label for="delivery-date" class="label">Delivery Date</label>
                                  <input soho-datepicker id="delivery-date" name="delivery-date"
-                                    [options]="datePickerOptions" placeholder="Select Delivery Date" />
+                                    [options]="datePickerOptions" placeholder="Select Delivery Date"
+                                    [(ngModel)]="exceldataDeliveryDate" />
                               </div>
                               <div class="field">
                                  <label for="sales-rep" class="label">Sales Rep</label>
-                                 <input type="text" id="sales-rep" name="sales-rep" />
+                                 <input soho-autocomplete id="sales-rep" name="sales-rep" aria-required="true"
+                                    data-validate="required" [source]="excellistSalesRepSource"
+                                    [template]="excelsaleRepTemplate" filterMode="contains"
+                                    (selected)="onSelectedSalesRepExcel($event)">
                               </div>
                            </div>
                         </div>
