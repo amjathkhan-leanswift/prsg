@@ -3,7 +3,7 @@
       <div class="field">
          <label for="facility" class="label">Facility</label>
          <select soho-dropdown soho-busyindicator id="facility" name="facility" placeholder="Select Facility"
-            [(ngModel)]="dataFacility">
+            [(ngModel)]="dataFacility" aria-required="true" data-validate="required">
             <option value="-1">&nbsp;</option>
             <option *ngFor="let faci of listFaciData" [value]="faci.FACI">{{faci.FACI}} - {{faci.FACN}}</option>
          </select>
@@ -11,7 +11,7 @@
       <div class="field">
          <label for="order-type" class="label">Order Type</label>
          <select soho-dropdown soho-busyindicator id="order-type" name="order-type" placeholder="Select Order Type"
-            [(ngModel)]="dataOrderType">
+            [(ngModel)]="dataOrderType" aria-required="true" data-validate="required">
             <option value="-1">&nbsp;</option>
             <option *ngFor="let ordData of listOrderData" [value]="ordData.ORTP">{{ordData.ORTP}} - {{ordData.TX40}}
             </option>
@@ -20,7 +20,7 @@
       <div class="field">
          <label for="whlo" class="label">Delivery Warehouse</label>
          <select soho-dropdown soho-busyindicator id="whlo" name="whlo" placeholder="Select Warehouse"
-            [(ngModel)]="dataWarehouse">
+            [(ngModel)]="dataWarehouse" aria-required="true" data-validate="required">
             <option value="-1">&nbsp;</option>
             <option *ngFor="let whData of listWareHouseData" [value]="whData.WHLO">{{whData.WHLO}} - {{whData.WHNM}}
          </select>
@@ -28,7 +28,8 @@
       <div class="field createbusiness">
          <label for="delivery-date" class="label">Delivery Date</label>
          <input soho-datepicker id="delivery-date" name="delivery-date" [options]="datePickerOptions"
-            placeholder="Select Delivery Date" [(ngModel)]="dataDeliveryDate" />
+            placeholder="Select Delivery Date" [(ngModel)]="dataDeliveryDate" aria-required="true"
+            data-validate="required" />
       </div>
       <div class="field">
          <label for="sales-rep" class="label">Sales Rep</label>

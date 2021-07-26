@@ -28,6 +28,8 @@ import { forkJoin } from 'rxjs';
 
 import { ChainModalComponent } from './chain-modal/chain-modal.component'
 import { CreateModalComponent } from './create-modal/create-modal.component';
+import { Key } from 'protractor';
+import { keyframes } from '@angular/animations';
 
 @Component({
    selector: 'app-prsg',
@@ -111,6 +113,15 @@ export class PrsgComponent extends CoreBase implements OnInit {
    exceldataWarehouse?: any;
    exceldataDeliveryDate?: any;
    exceldataSalesRep?: any;
+
+   itemOrderArray: any = [];
+   public orderData: any = {
+      FACI: null,
+      ORTP: null,
+      WHLO: null,
+      DWDT: null,
+      SMCD: null
+   }
 
    constructor(
       private miService: MIService,
@@ -599,6 +610,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
                getUOMData.forEach((item_uom: any) => {
                   tempDropUOM.push({ id: item_uom.ALUN, label: item_uom.ALUN, value: item_uom.ALUN, AUS2: item_uom.AUS2 });
                });
+               tempDropUOM.push({ id: '', label: '', value: '', AUS2: 0 });
                tempDropUOM.forEach(function (item: any, i: any) {
                   if (item.AUS2 === "1") {
                      tempDropUOM.splice(i, 1);
@@ -711,7 +723,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.matrixLineDatagrid.updateRow(event.row, event.rowData);
       let cellNo = event.cell;
       let cellValue = event.value;
-      console.log(this.matrixLineDatagrid.dataset);
+      // console.log(this.matrixLineDatagrid.dataset);
 
    }
 
@@ -719,7 +731,59 @@ export class PrsgComponent extends CoreBase implements OnInit {
    //    this.matrixLineDatagrid.validateAll();
    // }
 
-   genOrder() {
+   async genOrder() {
+      if (this.matrixLineDatagrid.dataset.length > 0) {
+         await this.prepOrder();
+         if (this.itemOrderArray.length > 0) {
+            await this.openOrder();
+         } else {
+            this.showToast("Order Error", "Empty Order List");
+         }
+
+      } else {
+         this.showToast("Order Error", "Empty Order List");
+      }
+
+   }
+
+   async prepOrder() {
+      // console.log(this.selectedCustItems);
+      // console.log(this.selectedInvItems);
+      // console.log(this.matrixLineDatagrid.dataset);
+
+      this.itemOrderArray = [];
+      let i = 0;
+      this.selectedCustItems.forEach((custItem: any) => {
+         let custNumber = custItem.CUNO;
+         var custCheck = this.matrixLineDatagrid.dataset.find(x => (x.CUNO === custItem.CUNO));
+         if (custCheck) {
+            this.selectedInvItems.forEach((invItem: any) => {
+               let itemKey = Object.keys(custCheck).filter(key => key.startsWith(invItem.ITNO))[0];
+               let uomKey = Object.keys(custCheck).filter(key => key.startsWith('UOM-' + invItem.ITNO))[0];
+               let priceKey = Object.keys(custCheck).filter(key => key.startsWith('PRICE-' + invItem.ITNO))[0];
+               if (itemKey) {
+                  if (custCheck[itemKey].trim() != "") {
+                     this.itemOrderArray.push({ 'CUNO': custNumber, 'ITNO': itemKey, 'ORQT': custCheck[itemKey] });
+                     if (uomKey) {
+                        if (custCheck[uomKey].trim() != "") {
+                           this.itemOrderArray[i].ALUN = custCheck[uomKey];
+                        }
+                     }
+                     if (priceKey) {
+                        if (custCheck[priceKey].trim() != "") {
+                           this.itemOrderArray[i].SAPR = custCheck[priceKey];
+                        }
+                     }
+                     i++;
+                  }
+               }
+            });
+         }
+      });
+      //console.log(this.itemOrderArray);
+   }
+
+   async openOrder() {
       const dialog = this.modalDialog.modal(CreateModalComponent);
       let dialogComponent: CreateModalComponent;
       dialog.buttons([
@@ -741,15 +805,72 @@ export class PrsgComponent extends CoreBase implements OnInit {
          .open()
          .afterClose((result) => {
             if (result) {
-               console.log("modal data");
-               console.log(dialogComponent.dataFacility);
-               console.log(dialogComponent.dataOrderType);
-               console.log(dialogComponent.dataWarehouse);
-               console.log(dialogComponent.dataDeliveryDate);
-               console.log(dialogComponent.dataSalesRep);
+               this.orderData.FACI = dialogComponent.dataFacility;
+               this.orderData.ORTP = dialogComponent.dataOrderType;
+               this.orderData.WHLO = dialogComponent.dataWarehouse;
+               this.orderData.DWDT = dialogComponent.dataDeliveryDate;
+               this.orderData.SMCD = dialogComponent.dataSalesRep;
+               this.createOrder();
             }
          });
+
    }
+
+   async createOrder() {
+      console.log(this.itemOrderArray);
+      console.log(this.orderData);
+      this.setBusy('initialData', true);
+      for await (const item of this.itemOrderArray) {
+         const inputRecord_head = {
+            CUNO: item.CUNO,
+            ORTP: this.orderData.ORTP,
+            FACI: this.orderData.FACI,
+            SMCD: this.orderData.SMCD
+         };
+         const request_head: IMIRequest = {
+            program: 'OIS100MI',
+            transaction: 'AddBatchHead',
+            record: inputRecord_head,
+            outputFields: ['ORNO']
+         };
+         await this.miService.execute(request_head)
+            .toPromise()
+            .then(async (response: any) => {
+               let getORNOData = response.item;
+               let ornoValue = getORNOData.ORNO;
+               // console.log(ornoValue);
+
+               const inputRecord_line = {
+                  ORNO: ornoValue,
+                  ITNO: item.ITNO,
+                  ORQT: item.ORQT,
+                  WHLO: this.orderData.WHLO,
+                  DWDT: this.orderData.DWDT
+               };
+               const request_line: IMIRequest = {
+                  program: 'OIS100MI',
+                  transaction: 'AddBatchLine',
+                  record: inputRecord_line
+               };
+               await this.miService.execute(request_line)
+                  .toPromise()
+                  .then((response: any) => {
+                     console.log(response.items);
+                  })
+                  .catch(function (error) {
+                     console.log("Add Batch Line Error", error.errorMessage);
+                  });
+
+            })
+            .catch(function (error) {
+               console.log("Add Batch Head Error", error.errorMessage);
+            });
+      };
+      this.setBusy('initialData', false);
+
+   }
+
+
 
    //Matrix End
 
