@@ -122,6 +122,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
       DWDT: null,
       SMCD: null
    }
+   dialog?: SohoMessageRef;
+   closeResult?: string;
 
    constructor(
       private miService: MIService,
@@ -470,13 +472,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       const inputRecord_item = {
          SQRY: term_temp
       };
-      // const request_item: IMIRequest = {
-      //    program: 'MMS200MI',
-      //    transaction: 'SearchItem',
-      //    record: inputRecord_item,
-      //    outputFields: ['ITNO', 'ITDS', 'STAT'],
-      //    maxReturnedRecords: this.maxRecords
-      // };
+
       const request_item: IMIRequest = {
          program: 'MDBREADMI',
          transaction: 'SelMITMAS00IES',
@@ -712,6 +708,15 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
 
    clearAll() {
+      this.matrixLineDatagrid.dataset = [];
+      this.initMatrixLineGrid();
+      this.customerLineDatagrid.dataset = [];
+      this.customerLineDatagrid.toolbar = { 'title': 'Customer List', actions: true, results: true, personalize: true, exportToExcel: true };
+      this.itemLineDatagrid.dataset = [];
+      this.itemOrderArray = [];
+      this.orderData = [];
+      this.businessChainText = null;
+      this.itemText = null;
 
    }
 
@@ -721,9 +726,6 @@ export class PrsgComponent extends CoreBase implements OnInit {
       // console.log(event.cell);
       // console.log(event.value);
       this.matrixLineDatagrid.updateRow(event.row, event.rowData);
-      let cellNo = event.cell;
-      let cellValue = event.value;
-      // console.log(this.matrixLineDatagrid.dataset);
 
    }
 
@@ -752,35 +754,38 @@ export class PrsgComponent extends CoreBase implements OnInit {
       // console.log(this.matrixLineDatagrid.dataset);
 
       this.itemOrderArray = [];
-      let i = 0;
+
       this.selectedCustItems.forEach((custItem: any) => {
          let custNumber = custItem.CUNO;
          var custCheck = this.matrixLineDatagrid.dataset.find(x => (x.CUNO === custItem.CUNO));
          if (custCheck) {
+            let tempArray: any = [];
+            let i = 0;
             this.selectedInvItems.forEach((invItem: any) => {
                let itemKey = Object.keys(custCheck).filter(key => key.startsWith(invItem.ITNO))[0];
                let uomKey = Object.keys(custCheck).filter(key => key.startsWith('UOM-' + invItem.ITNO))[0];
                let priceKey = Object.keys(custCheck).filter(key => key.startsWith('PRICE-' + invItem.ITNO))[0];
                if (itemKey) {
                   if (custCheck[itemKey].trim() != "") {
-                     this.itemOrderArray.push({ 'CUNO': custNumber, 'ITNO': itemKey, 'ORQT': custCheck[itemKey] });
+                     tempArray.push({ 'ITNO': itemKey, 'ORQT': custCheck[itemKey] });
                      if (uomKey) {
                         if (custCheck[uomKey].trim() != "") {
-                           this.itemOrderArray[i].ALUN = custCheck[uomKey];
+                           tempArray[i].ALUN = custCheck[uomKey];
                         }
                      }
                      if (priceKey) {
                         if (custCheck[priceKey].trim() != "") {
-                           this.itemOrderArray[i].SAPR = custCheck[priceKey];
+                           tempArray[i].SAPR = custCheck[priceKey];
                         }
                      }
                      i++;
                   }
                }
             });
+            this.itemOrderArray.push({ 'CUNO': custNumber, 'ORDER': tempArray });
          }
       });
-      //console.log(this.itemOrderArray);
+      console.log(this.itemOrderArray);
    }
 
    async openOrder() {
@@ -839,27 +844,31 @@ export class PrsgComponent extends CoreBase implements OnInit {
                let getORNOData = response.item;
                let ornoValue = getORNOData.ORNO;
                // console.log(ornoValue);
-
-               const inputRecord_line = {
-                  ORNO: ornoValue,
-                  ITNO: item.ITNO,
-                  ORQT: item.ORQT,
-                  WHLO: this.orderData.WHLO,
-                  DWDT: this.orderData.DWDT
-               };
-               const request_line: IMIRequest = {
-                  program: 'OIS100MI',
-                  transaction: 'AddBatchLine',
-                  record: inputRecord_line
-               };
-               await this.miService.execute(request_line)
-                  .toPromise()
-                  .then((response: any) => {
-                     console.log(response.items);
-                  })
-                  .catch(function (error) {
-                     console.log("Add Batch Line Error", error.errorMessage);
-                  });
+               for await (const itemOrder of item.ORDER) {
+                  const inputRecord_line = {
+                     ORNO: ornoValue,
+                     ITNO: itemOrder.ITNO,
+                     ORQT: itemOrder.ORQT,
+                     WHLO: this.orderData.WHLO,
+                     DWDT: this.orderData.DWDT
+                  };
+                  // if(itemOrder.ALUN){
+                  //    inputRecord_line.ALUN = itemOrder.ALUN
+                  // }
+                  const request_line: IMIRequest = {
+                     program: 'OIS100MI',
+                     transaction: 'AddBatchLine',
+                     record: inputRecord_line
+                  };
+                  await this.miService.execute(request_line)
+                     .toPromise()
+                     .then((response: any) => {
+                        console.log(response.items);
+                     })
+                     .catch(function (error) {
+                        console.log("Add Batch Line Error", error.errorMessage);
+                     });
+               }
 
             })
             .catch(function (error) {
@@ -867,11 +876,35 @@ export class PrsgComponent extends CoreBase implements OnInit {
             });
       };
       this.setBusy('initialData', false);
-
+      this.openSuccess();
    }
 
+   openSuccess() {
+      const buttons = [{
+         text: 'Done',
+         click: (_e: any, modal: any) => {
+            this.closeResult = 'Done';
+            (this.dialog as any) = null;
+            modal.close(true);
+            this.clearAll();
+         },
+         isDefault: true
+      }];
 
+      this.dialog = (this.messageService as any)
+         .message()
+         .title('<span>Order Status</span>')
+         .message(`<span class="message"> Order Created Successfully </span><br>`)
+         .buttons(buttons)
+         .beforeClose(() => {
+            return true;
+         }).beforeOpen(() => {
+            return true;
+         }).opened(() => {
 
+         })
+         .open();
+   }
    //Matrix End
 
    //Upload Excel start
