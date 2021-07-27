@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import {
    SohoDropDownComponent
 } from 'ids-enterprise-ng';
@@ -13,15 +13,21 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class CreateModalComponent implements OnInit {
 
+   @Input() listFaciData: any;
+   @Input() listOrderData: any;
+   @Input() listWareHouseData: any;
+   @Input() listSalesRep: any;
+
    isInitData: boolean = false;
    public datePickerOptions: SohoDatePickerOptions = {
       mode: 'standard',
       dateFormat: 'yyyyMMdd'
    }
-   listFaciData: any = [];
-   listOrderData: any = [];
-   listWareHouseData: any = [];
-   listSalesRep: any = [];
+
+   // listFaciData: any = [];
+   // listOrderData: any = [];
+   // listWareHouseData: any = [];
+   // listSalesRep: any = [];
    maxRecords = 10000;
 
    saleRepTemplate = `<script type="text/html">
@@ -49,10 +55,10 @@ export class CreateModalComponent implements OnInit {
 
    async initialLoadData() {
       this.setBusy('initialData', true);
-      await this.initListFacility();
-      await this.initLstOrderTypes();
-      await this.initLstWarehouses();
-      await this.initSalesRep();
+      // await this.initListFacility();
+      // await this.initLstOrderTypes();
+      // await this.initLstWarehouses();
+      // await this.initSalesRep();
       this.setBusy('initialData', false);
    }
 

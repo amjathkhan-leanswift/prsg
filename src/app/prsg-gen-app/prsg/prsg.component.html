@@ -137,7 +137,11 @@
                               </div>
                               <div class="field">
                                  <label for="customer" class="label">Customer</label>
-                                 <input type="text" id="customer" name="customer" />
+                                 <input soho-autocomplete id="customer" name="customer" aria-required="true"
+                                    data-validate="required" [source]="excellistCUstomerSource"
+                                    [template]="excelcustTemplate" filterMode="contains"
+                                    (selected)="onSelectedCustomerExcel($event)" [(ngModel)]="exceldatatempCustomer"
+                                    soho-busyindicator [activated]="isCustomerBusy" [blockUI]="true" [displayDelay]="0">
                               </div>
                            </div>
                            <div class="six columns">
@@ -161,7 +165,7 @@
                                  <input soho-autocomplete id="sales-rep" name="sales-rep" aria-required="true"
                                     data-validate="required" [source]="excellistSalesRepSource"
                                     [template]="excelsaleRepTemplate" filterMode="contains"
-                                    (selected)="onSelectedSalesRepExcel($event)">
+                                    (selected)="onSelectedSalesRepExcel($event)" [(ngModel)]="exceldatatempSalesRep">
                               </div>
                            </div>
                         </div>
@@ -180,8 +184,8 @@
                            <input type="text" id="order-total" name="order-total" />
                         </div>
                         <div class="all_create">
-                           <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button">Cancel
-                              Order</button>
+                           <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button"
+                              (click)="cancelExcelOrder()">Cancel Order</button>
                            <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button">Create
                               Order</button>
                         </div>

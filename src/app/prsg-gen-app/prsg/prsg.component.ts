@@ -1,12 +1,8 @@
 import {
    Component,
    OnInit,
-   AfterViewInit,
-   QueryList,
-   ViewChildren,
    ViewContainerRef,
-   ViewChild,
-   ElementRef
+   ViewChild
 } from '@angular/core';
 import { CoreBase, IMIRequest, IMIResponse, IUserContext } from '@infor-up/m3-odin';
 import { MIService, UserService } from '@infor-up/m3-odin-angular';
@@ -20,16 +16,10 @@ import {
    SohoModalDialogService, SohoModalDialogRef,
    SohoFileUploadComponent, SohoTrackDirtyDirective
 } from 'ids-enterprise-ng';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-import { SohoInputValidateDirective } from 'ids-enterprise-ng';
-import { DecimalPipe } from '@angular/common';
-import { forkJoin } from 'rxjs';
 
 import { ChainModalComponent } from './chain-modal/chain-modal.component'
 import { CreateModalComponent } from './create-modal/create-modal.component';
-import { Key } from 'protractor';
-import { keyframes } from '@angular/animations';
+import { GlobalConstants } from './global-constants';
 
 @Component({
    selector: 'app-prsg',
@@ -98,6 +88,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    excellistOrderData: any = [];
    excellistWareHouseData: any = [];
    excellistSalesRep: any = [];
+   excellistCustmer: any = [];
 
    excelsaleRepTemplate = `<script type="text/html">
       <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
@@ -108,11 +99,25 @@ export class PrsgComponent extends CoreBase implements OnInit {
       </li>
       </script>`;
 
+   excelcustTemplate = `<script type="text/html">
+      <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
+         <a tabindex="-1">
+            <span class="display-value">{{{label}}} - {{{cunm}}}</span>
+            <!--span class="display-value display-newline"></span-->
+         </a>
+      </li>
+      </script>`;
+
    exceldataFacility?: any;
    exceldataOrderType?: any;
    exceldataWarehouse?: any;
    exceldataDeliveryDate?: any;
    exceldataSalesRep?: any;
+   exceldataCustomer?: any;
+
+   exceldatatempCustomer?: any;
+   exceldatatempSalesRep?: any;
+   isCustomerBusy: boolean = false;
 
    itemOrderArray: any = [];
    public orderData: any = {
@@ -124,6 +129,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
    dialog?: SohoMessageRef;
    closeResult?: string;
+   orderItemError?: any = [];
 
    constructor(
       private miService: MIService,
@@ -241,7 +247,6 @@ export class PrsgComponent extends CoreBase implements OnInit {
             }
          ],
          dataset: [],
-         // toolbar: { title: 'Customer List', actions: true, results: true, personalize: true, exportToExcel: true },
          emptyMessage: {
             title: 'Empty Item List',
             icon: 'icon-empty-no-data'
@@ -330,7 +335,6 @@ export class PrsgComponent extends CoreBase implements OnInit {
             }
          ],
          dataset: [],
-         // toolbar: { title: 'Customer List', actions: true, results: true, personalize: true, exportToExcel: true },
          emptyMessage: {
             title: 'Empty Item List',
             icon: 'icon-empty-no-data'
@@ -805,6 +809,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
          .title(`Create Order`)
          .apply((comp: CreateModalComponent) => {
+            comp.listFaciData = this.excellistFaciData;
+            comp.listOrderData = this.excellistOrderData;
+            comp.listWareHouseData = this.excellistWareHouseData;
+            comp.listSalesRep = this.excellistSalesRep;
             dialogComponent = comp;
          })
          .open()
@@ -825,6 +833,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
       console.log(this.itemOrderArray);
       console.log(this.orderData);
       this.setBusy('initialData', true);
+      this.orderItemError = [];
+      GlobalConstants.orderError = 0;
       for await (const item of this.itemOrderArray) {
          const inputRecord_head = {
             CUNO: item.CUNO,
@@ -845,16 +855,19 @@ export class PrsgComponent extends CoreBase implements OnInit {
                let ornoValue = getORNOData.ORNO;
                // console.log(ornoValue);
                for await (const itemOrder of item.ORDER) {
-                  const inputRecord_line = {
+                  let inputRecord_line = {
                      ORNO: ornoValue,
                      ITNO: itemOrder.ITNO,
                      ORQT: itemOrder.ORQT,
                      WHLO: this.orderData.WHLO,
                      DWDT: this.orderData.DWDT
                   };
-                  // if(itemOrder.ALUN){
-                  //    inputRecord_line.ALUN = itemOrder.ALUN
-                  // }
+                  if (itemOrder.ALUN) {
+                     inputRecord_line['ALUN'] = itemOrder.ALUN;
+                  }
+                  if (itemOrder.SAPR) {
+                     inputRecord_line['SAPR'] = itemOrder.SAPR;
+                  }
                   const request_line: IMIRequest = {
                      program: 'OIS100MI',
                      transaction: 'AddBatchLine',
@@ -863,11 +876,16 @@ export class PrsgComponent extends CoreBase implements OnInit {
                   await this.miService.execute(request_line)
                      .toPromise()
                      .then((response: any) => {
+                        GlobalConstants.orderError = 0;
                         console.log(response.items);
                      })
                      .catch(function (error) {
+                        GlobalConstants.orderError = 1;
                         console.log("Add Batch Line Error", error.errorMessage);
                      });
+                  if (GlobalConstants.orderError == 1) {
+                     this.orderItemError.push({ 'ITNO': itemOrder.ITNO });
+                  }
                }
 
             })
@@ -876,6 +894,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
             });
       };
       this.setBusy('initialData', false);
+      console.log(this.orderItemError);
       this.openSuccess();
    }
 
@@ -891,10 +910,19 @@ export class PrsgComponent extends CoreBase implements OnInit {
          isDefault: true
       }];
 
+      let errorOrder = "";
+      let errorMsg = '<span class="message"> Order Created Successfully </span><br>';
+      if (this.orderItemError.length > 0) {
+         this.orderItemError.forEach((order: any) => {
+            errorOrder = errorOrder + order.ITNO + " ";
+         })
+         errorMsg = '<span class="message"> Order Created Successfully </span><br><br><p class="message1">Some of Items Failed</P><br><p>Items does not exists in the Warehouse</p><br>' + errorOrder;
+      }
+
       this.dialog = (this.messageService as any)
          .message()
          .title('<span>Order Status</span>')
-         .message(`<span class="message"> Order Created Successfully </span><br>`)
+         .message(errorMsg)
          .buttons(buttons)
          .beforeClose(() => {
             return true;
@@ -996,13 +1024,60 @@ export class PrsgComponent extends CoreBase implements OnInit {
       response(term, this.excellistSalesRep);
    }
 
+   public excellistCUstomerSource = async (term: string, response: any) => {
+      this.setBusy('customerData', true);
+
+      this.excellistCustmer = [];
+      let term_temp = '((CUNO:' + term + '*) OR (CUNO:' + term + ') OR (CUNM:' + term + '*) OR (CUNM:' + term + '))';
+      const input_cuno = {
+         SQRY: term_temp
+      }
+      const request_cuno: IMIRequest = {
+         program: 'CRS610MI',
+         transaction: 'SearchCustomer',
+         record: input_cuno,
+         outputFields: ['CUNO', 'CUNM'],
+         maxReturnedRecords: this.maxRecords
+      };
+
+      await this.miService.execute(request_cuno)
+         .toPromise()
+         .then((response_cuno: any) => {
+            let custTempItems = response_cuno.items;
+            custTempItems.forEach((item: any) => {
+               this.excellistCustmer.push({ 'label': item.CUNO + ' - ' + item.CUNM, 'cuno': item.CUNO, 'value': item.CUNO + ' - ' + item.CUNM });
+            });
+         })
+         .catch(function (error) {
+            console.log("Customer Error:", error.errorMessage);
+         });
+
+      response(term, this.excellistCustmer);
+      this.setBusy('customerData', false);
+   }
+
    onSelectedSalesRepExcel(event: any) {
       this.exceldataSalesRep = event[2].smcd;
    }
 
+   onSelectedCustomerExcel(event: any) {
+      this.exceldataCustomer = event[2].cuno;
+   }
 
    onExcelChange(event: any) {
       console.log('onChange', event);
+   }
+
+   cancelExcelOrder() {
+      this.exceldataFacility = null;
+      this.exceldataOrderType = null;
+      this.exceldataWarehouse = null;
+      this.exceldataDeliveryDate = null;
+      this.exceldataSalesRep = null;
+      this.exceldataCustomer = null;
+      this.exceldatatempCustomer = null;
+      this.exceldatatempSalesRep = null;
+
    }
 
    //UPload Excel End
@@ -1016,7 +1091,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
          this.isItemBusy = isBusy;
       } else if (isCall == "matrixData") {
          this.isMatrixBusy = isBusy;
+      } else if (isCall == "customerData") {
+         this.isCustomerBusy = isBusy;
       }
+
    }
 
    showToast(title: any, message: any) {
