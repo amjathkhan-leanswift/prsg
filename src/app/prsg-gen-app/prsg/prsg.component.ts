@@ -21,6 +21,8 @@ import { ChainModalComponent } from './chain-modal/chain-modal.component'
 import { CreateModalComponent } from './create-modal/create-modal.component';
 import { GlobalConstants } from './global-constants';
 
+import * as XLSX from 'xlsx';
+
 @Component({
    selector: 'app-prsg',
    templateUrl: './prsg.component.html',
@@ -118,6 +120,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    exceldatatempCustomer?: any;
    exceldatatempSalesRep?: any;
    isCustomerBusy: boolean = false;
+   excelDataArr?: any = [];
 
    itemOrderArray: any = [];
    public orderData: any = {
@@ -314,24 +317,32 @@ export class PrsgComponent extends CoreBase implements OnInit {
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             },
             {
-               width: '65%', id: 'col-itds', field: 'ITDS', name: 'Name',
+               width: '32%', id: 'col-itds', field: 'ITDS', name: 'Name',
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             },
             {
-               width: '15%', id: 'col-stat', field: 'STAT', name: 'Status',
+               width: '8%', id: 'col-stat', field: 'STAT', name: 'Status',
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             },
             {
-               width: '15%', id: 'col-qty', field: 'QTY', name: 'Quantity',
+               width: '8%', id: 'col-itty', field: 'ITTY', name: 'Type',
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             },
             {
-               width: '15%', id: 'col-uom', field: 'UOM', name: 'UOM',
+               width: '8%', id: 'col-itgr', field: 'ITGR', name: 'Group',
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             },
             {
-               width: '15%', id: 'col-price', field: 'PRICE', name: 'PRICE',
-               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+               width: '8%', id: 'col-orqt', field: 'ORQT', name: 'Quantity',
+               resizable: true, formatter: Soho.Formatters.Decimal, editor: Soho.Editors.Input
+            },
+            {
+               width: '8%', id: 'col-alun', field: 'ALUN', name: 'UOM',
+               resizable: true, editor: Soho.Editors.Input
+            },
+            {
+               width: '8%', id: 'col-sapr', field: 'SAPR', name: 'PRICE',
+               resizable: true, formatter: Soho.Formatters.Decimal, editor: Soho.Editors.Input
             }
          ],
          dataset: [],
@@ -584,14 +595,14 @@ export class PrsgComponent extends CoreBase implements OnInit {
          this.showToast("Item Error", "Please Select Items")
       } else {
          this.setBusy('matrixData', true);
-         await this.loadUOM();
+         await this.loadUOM(this.selectedInvItems);
          await this.loadOrderColumnData();
       }
    }
 
-   async loadUOM() {
+   async loadUOM(invItems: any) {
       this.dropUOM = [];
-      for await (const item of this.selectedInvItems) {
+      for await (const item of invItems) {
          const inputRecord_item = {
             ITNO: item.ITNO
          };
@@ -830,8 +841,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
 
    async createOrder() {
-      console.log(this.itemOrderArray);
-      console.log(this.orderData);
+      // console.log(this.itemOrderArray);
+      // console.log(this.orderData);
       this.setBusy('initialData', true);
       this.orderItemError = [];
       GlobalConstants.orderError = 0;
@@ -906,6 +917,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
             (this.dialog as any) = null;
             modal.close(true);
             this.clearAll();
+            this.clearExcelAll();
          },
          isDefault: true
       }];
@@ -1065,10 +1077,41 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
 
    onExcelChange(event: any) {
-      console.log('onChange', event);
+      this.excelDataArr = [];
+      /* wire up file reader */
+      const target: DataTransfer = <DataTransfer>(event.target);
+      if (target.files.length !== 1) {
+         throw new Error('Cannot use multiple files');
+      }
+      const reader: FileReader = new FileReader();
+      reader.readAsBinaryString(target.files[0]);
+      reader.onload = (e: any) => {
+         /* create workbook */
+         const binarystr: string = e.target.result;
+         const wb: XLSX.WorkBook = XLSX.read(binarystr, { type: 'binary' });
+
+         /* selected the first sheet */
+         const wsname: string = wb.SheetNames[0];
+         const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+         /* save data */
+         const data = XLSX.utils.sheet_to_json(ws); // to get 2d array pass 2nd parameter as object {header: 1}
+         this.excelDataArr = data;
+      };
+
+   }
+   async updateExcelGrid() {
+      this.setBusy('excelData', true);
+      //await this.loadUOM(this.excelDataArr);
+      this.itemExcelLineDatagrid ? this.itemExcelLineDatagrid.dataset = this.excelDataArr : this.itemExcelLineDatagrid.dataset = this.excelDataArr;
+      this.setBusy('excelData', false);
    }
 
-   cancelExcelOrder() {
+   onExcelCellChange(event: any) {
+      this.itemExcelLineDatagrid.updateRow(event.row, event.rowData);
+   }
+
+   clearExcelAll() {
       this.exceldataFacility = null;
       this.exceldataOrderType = null;
       this.exceldataWarehouse = null;
@@ -1077,7 +1120,82 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.exceldataCustomer = null;
       this.exceldatatempCustomer = null;
       this.exceldatatempSalesRep = null;
+      this.fileupload.clearUploadFile();
+      this.excelDataArr = [];
+      this.updateExcelGrid();
+   }
 
+   isEnabled(): boolean {
+      return !!this.exceldataFacility && !!this.exceldataOrderType && !!this.exceldataWarehouse && !!this.exceldataDeliveryDate && !!this.exceldataSalesRep && !!this.exceldataCustomer && (this.excelDataArr.length > 0) && (this.exceldataFacility != "-1") && (this.exceldataOrderType != "-1") && (this.exceldataWarehouse != "-1") && (this.itemExcelLineDatagrid.dataset.length > 0);
+   }
+
+   async genExcelOrder() {
+      this.setBusy('initialData', true);
+      this.orderItemError = [];
+      GlobalConstants.orderError = 0;
+
+      const inputRecord_head = {
+         CUNO: this.exceldataCustomer,
+         ORTP: this.exceldataOrderType,
+         FACI: this.exceldataFacility,
+         SMCD: this.exceldataSalesRep
+      };
+      const request_head: IMIRequest = {
+         program: 'OIS100MI',
+         transaction: 'AddBatchHead',
+         record: inputRecord_head,
+         outputFields: ['ORNO']
+      };
+      await this.miService.execute(request_head)
+         .toPromise()
+         .then(async (response: any) => {
+            let getORNOData = response.item;
+            let ornoValue = getORNOData.ORNO;
+            for await (const itemOrder of this.itemExcelLineDatagrid.dataset) {
+               console.log(itemOrder.ORQT);
+               if (itemOrder.ORQT && (itemOrder.ORQT != "")) {
+                  let inputRecord_line = {
+                     ORNO: ornoValue,
+                     ITNO: itemOrder.ITNO,
+                     ORQT: itemOrder.ORQT,
+                     WHLO: this.exceldataWarehouse,
+                     DWDT: this.exceldataDeliveryDate
+                  };
+                  if (itemOrder.ALUN) {
+                     inputRecord_line['ALUN'] = itemOrder.ALUN;
+                  }
+                  if (itemOrder.SAPR) {
+                     inputRecord_line['SAPR'] = itemOrder.SAPR;
+                  }
+                  const request_line: IMIRequest = {
+                     program: 'OIS100MI',
+                     transaction: 'AddBatchLine',
+                     record: inputRecord_line
+                  };
+                  await this.miService.execute(request_line)
+                     .toPromise()
+                     .then((response: any) => {
+                        GlobalConstants.orderError = 0;
+                        console.log(response.items);
+                     })
+                     .catch(function (error) {
+                        GlobalConstants.orderError = 1;
+                        console.log("Add Batch Line Error", error.errorMessage);
+                     });
+                  if (GlobalConstants.orderError == 1) {
+                     this.orderItemError.push({ 'ITNO': itemOrder.ITNO });
+                  }
+               }
+            }
+
+         })
+         .catch(function (error) {
+            console.log("Add Batch Head Error", error.errorMessage);
+         });
+
+      this.setBusy('initialData', false);
+      console.log(this.orderItemError);
+      this.openSuccess();
    }
 
    //UPload Excel End
@@ -1093,6 +1211,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
          this.isMatrixBusy = isBusy;
       } else if (isCall == "customerData") {
          this.isCustomerBusy = isBusy;
+      } else if (isCall == "excelData") {
+         this.isItemExcelBusy = isBusy;
       }
 
    }

@@ -111,7 +111,6 @@
             <div soho-tab-panel tabId="tabs-upload-excel">
 
                <div class="row fixcenter">
-
                   <div class="six columns">
                      <fieldset class="myfieldset" aria-labelledby="fieldset-id">
                         <legend id="fieldset-id">Order Header</legend>
@@ -120,7 +119,8 @@
                               <div class="field">
                                  <label for="facility" class="label">Facility</label>
                                  <select soho-dropdown soho-busyindicator id="facility" name="facility"
-                                    placeholder="Select Facility" [(ngModel)]="exceldataFacility">
+                                    placeholder="Select Facility" [(ngModel)]="exceldataFacility" aria-required="true"
+                                    data-validate="required">
                                     <option value="-1">&nbsp;</option>
                                     <option *ngFor="let faci of excellistFaciData" [value]="faci.FACI">{{faci.FACI}} -
                                        {{faci.FACN}}</option>
@@ -129,7 +129,8 @@
                               <div class="field">
                                  <label for="order-type" class="label">Order Type</label>
                                  <select soho-dropdown soho-busyindicator id="order-type" name="order-type"
-                                    placeholder="Select Order Type" [(ngModel)]="exceldataOrderType">
+                                    placeholder="Select Order Type" [(ngModel)]="exceldataOrderType"
+                                    aria-required="true" data-validate="required">
                                     <option value="-1">&nbsp;</option>
                                     <option *ngFor="let ordData of excellistOrderData" [value]="ordData.ORTP">
                                        {{ordData.ORTP}} - {{ordData.TX40}}
@@ -148,7 +149,8 @@
                               <div class="field">
                                  <label for="whlo" class="label">Delivery Warehouse</label>
                                  <select soho-dropdown soho-busyindicator id="whlo" name="whlo"
-                                    placeholder="Select Warehouse" [(ngModel)]="exceldataWarehouse">
+                                    placeholder="Select Warehouse" [(ngModel)]="exceldataWarehouse" aria-required="true"
+                                    data-validate="required">
                                     <option value="-1">&nbsp;</option>
                                     <option *ngFor="let whData of excellistWareHouseData" [value]="whData.WHLO">
                                        {{whData.WHLO}} - {{whData.WHNM}}
@@ -158,7 +160,7 @@
                                  <label for="delivery-date" class="label">Delivery Date</label>
                                  <input soho-datepicker id="delivery-date" name="delivery-date"
                                     [options]="datePickerOptions" placeholder="Select Delivery Date"
-                                    [(ngModel)]="exceldataDeliveryDate" />
+                                    [(ngModel)]="exceldataDeliveryDate" aria-required="true" data-validate="required" />
                               </div>
                               <div class="field">
                                  <label for="sales-rep" class="label">Sales Rep</label>
@@ -178,16 +180,17 @@
                            <input soho-fileupload id="uploadexcel" name=uploadexcel accept="{{fileLimits}}"
                               (change)="onExcelChange($event)" />
                         </div>
-                        <button class="btn-primary btn_width_full btn-normal" type="button">Upload Excel</button>
-                        <div class="field single-line-field">
+                        <button class="btn-primary btn_width_full btn-normal" type="button"
+                           (click)="updateExcelGrid()">Upload Excel</button>
+                        <!-- <div class="field single-line-field">
                            <label for="order-total" class="label">Order Total : </label>
                            <input type="text" id="order-total" name="order-total" />
-                        </div>
+                        </div> -->
                         <div class="all_create">
                            <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button"
-                              (click)="cancelExcelOrder()">Cancel Order</button>
-                           <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button">Create
-                              Order</button>
+                              (click)="clearExcelAll()">Clear Order</button>
+                           <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button"
+                              (click)="genExcelOrder()" [disabled]="!isEnabled()">Create Order</button>
                         </div>
                      </div>
                   </div>
@@ -214,7 +217,8 @@
                   <div class="twelve columns">
                      <div class="card cardpad">
                         <div #itemExcelLineDatagrid soho-datagrid [gridOptions]="itemExcelGridOptions"
-                           soho-busyindicator [activated]="isItemExcelBusy" [blockUI]="true" [displayDelay]="0">
+                           soho-busyindicator [activated]="isItemExcelBusy" [blockUI]="true" [displayDelay]="0"
+                           (cellchange)="onExcelCellChange($event)">
                         </div>
                      </div>
                   </div>
