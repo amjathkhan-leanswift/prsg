@@ -864,7 +864,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
             CUNO: item.CUNO,
             ORTP: this.orderData.ORTP,
             FACI: this.orderData.FACI,
-            SMCD: this.orderData.SMCD
+            SMCD: this.orderData.SMCD,
+            RLDT: this.orderData.DWDT
          };
          const request_head: IMIRequest = {
             program: 'OIS100MI',
@@ -1205,7 +1206,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
          CUNO: this.exceldataCustomer,
          ORTP: this.exceldataOrderType,
          FACI: this.exceldataFacility,
-         SMCD: this.exceldataSalesRep
+         SMCD: this.exceldataSalesRep,
+         RLDT: this.exceldataDeliveryDate
       };
       const request_head: IMIRequest = {
          program: 'OIS100MI',
