@@ -23,7 +23,8 @@ p.labelname{
 }
 
 .field-short input{
-   width:100%;
+   width:300px;
+   max-width: 100%;
 }
 
 .field-short input.textfullwidth{
@@ -269,7 +270,7 @@ h1.headerlabel{
 }
 .myfieldset{
    border: 1px solid #ddd;
-   padding: 15px 30px;
+   padding: 15px 20px;
    padding-right: 0px;
    width: auto;
    margin-bottom: 20px;
@@ -282,7 +283,7 @@ fieldset > legend, .fieldset > legend{
    border: 1px solid #ddd;
    padding: 20px;
    position: relative;
-   min-height: 280px;
+   min-height: 230px;
 }
 .all_create{
    margin-top: 20px;
@@ -296,7 +297,7 @@ fieldset > legend, .fieldset > legend{
 .additemdiv{
    display: flex;
     align-items: flex-end;
-    min-height: 300px;
+    min-height: 230px;
     justify-content: flex-end;
 }
 .itembottom{
@@ -313,4 +314,21 @@ fieldset > legend, .fieldset > legend{
    width:140px;
    font-weight: 600;
    font-size: 1.4rem;
+}
+.all_create_left{
+   float:left;
+}
+.all_create_right{
+   float:right;
+}
+
+.field-short label{
+   text-align: left !important;
+   display:block !important;
+}
+::ng-deep .error-message {
+    left: 0px !important;
+}
+.field-short input.widthsm{
+   width:200px !important;
 }

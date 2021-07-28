@@ -95,7 +95,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    excelsaleRepTemplate = `<script type="text/html">
       <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
          <a tabindex="-1">
-            <span class="display-value">{{{label}}} - {{{tx40}}}</span>
+            <span class="display-value">{{{label}}}</span>
             <!--span class="display-value display-newline"></span-->
          </a>
       </li>
@@ -104,7 +104,16 @@ export class PrsgComponent extends CoreBase implements OnInit {
    excelcustTemplate = `<script type="text/html">
       <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
          <a tabindex="-1">
-            <span class="display-value">{{{label}}} - {{{cunm}}}</span>
+            <span class="display-value">{{{label}}}</span>
+            <!--span class="display-value display-newline"></span-->
+         </a>
+      </li>
+      </script>`;
+
+   excelItemTemplate = `<script type="text/html">
+      <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
+         <a tabindex="-1">
+            <span class="display-value">{{{label}}}</span>
             <!--span class="display-value display-newline"></span-->
          </a>
       </li>
@@ -133,6 +142,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
    dialog?: SohoMessageRef;
    closeResult?: string;
    orderItemError?: any = [];
+
+   isAddItemBusy: boolean = false;
+   excelAdditemData?: any = [];
+   tempAddItem?: any = []
 
    constructor(
       private miService: MIService,
@@ -341,7 +354,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
                resizable: true, editor: Soho.Editors.Input
             },
             {
-               width: '8%', id: 'col-sapr', field: 'SAPR', name: 'PRICE',
+               width: '8%', id: 'col-sapr', field: 'SAPR', name: 'Price',
                resizable: true, formatter: Soho.Formatters.Decimal, editor: Soho.Editors.Input
             }
          ],
@@ -1014,7 +1027,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       const request: IMIRequest = {
          program: 'CRS100MI',
          transaction: 'List',
-         outputFields: ['SMCD', 'TX40'],
+         outputFields: ['SMCD', 'TX40', 'SDEP', 'BUAR'],
          maxReturnedRecords: this.maxRecords
       };
 
@@ -1024,7 +1037,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
             // console.log(response.items);
             let templistSalesRep = response.items;
             templistSalesRep.forEach((item: any) => {
-               this.excellistSalesRep.push({ 'label': item.SMCD + ' - ' + item.TX40, 'smcd': item.SMCD, 'value': item.SMCD + ' - ' + item.TX40 });
+               this.excellistSalesRep.push({ 'label': item.SDEP + ' - ' + item.SMCD + ' - ' + item.TX40, 'smcd': item.SMCD, 'value': item.SMCD + ' - ' + item.TX40 });
             });
          })
          .catch(function (error) {
@@ -1111,6 +1124,59 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.itemExcelLineDatagrid.updateRow(event.row, event.rowData);
    }
 
+   public excellistAddItemSource = async (term: string, response: any) => {
+      this.setBusy('addItemData', true);
+
+      this.excelAdditemData = [];
+      let term_temp = '((ITNO:' + term + '*) OR (ITNO:' + term + ') OR (ITDS:' + term + '*) OR (ITDS:' + term + '))';
+
+      const inputRecord_item = {
+         SQRY: term_temp
+      };
+
+      const request_item: IMIRequest = {
+         program: 'MDBREADMI',
+         transaction: 'SelMITMAS00IES',
+         record: inputRecord_item,
+         outputFields: ['ITNO', 'ITDS', 'STAT', 'ITTY', 'ITGR'],
+         maxReturnedRecords: this.maxRecords
+      };
+      await this.miService.execute(request_item)
+         .toPromise()
+         .then((response: any) => {
+            let getItemData = response.items;
+            getItemData.forEach((item: any) => {
+               this.excelAdditemData.push({ 'label': item.ITNO + ' - ' + item.ITDS, 'ITNO': item.ITNO, 'ITDS': item.ITDS, 'STAT': item.STAT, 'ITTY': item.ITTY, 'ITGR': item.ITGR, 'value': item.ITNO });
+            });
+         })
+         .catch(function (error) {
+            console.log("Item Data Error", error.errorMessage);
+         });
+
+      response(term, this.excelAdditemData);
+      this.setBusy('addItemData', false);
+   }
+
+   onSelectedAddItemExcel(event: any) {
+      this.tempAddItem = [];
+      this.tempAddItem.push({ 'ITNO': event[2].ITNO, 'ITDS': event[2].ITDS, 'STAT': event[2].STAT, 'ITTY': event[2].ITTY, 'ITGR': event[2].ITGR });
+   }
+   addItemExcel() {
+      this.excelDataArr = [];
+      this.excelDataArr = this.itemExcelLineDatagrid.dataset;
+      console.log(this.excelDataArr);
+      var itemCheck = this.excelDataArr.find((x: any) => (x.ITNO + "" === this.tempAddItem[0].ITNO));
+      console.log(itemCheck);
+
+      if (!itemCheck) {
+         this.excelDataArr.push(this.tempAddItem[0]);
+         this.updateExcelGrid();
+      } else {
+         this.showToast('Item Error', 'Item already exist in the list');
+      }
+      //console.log(this.excelDataArr);
+   }
+
    clearExcelAll() {
       this.exceldataFacility = null;
       this.exceldataOrderType = null;
@@ -1121,6 +1187,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.exceldatatempCustomer = null;
       this.exceldatatempSalesRep = null;
       this.fileupload.clearUploadFile();
+      this.itemText1 = null;
       this.excelDataArr = [];
       this.updateExcelGrid();
    }
@@ -1198,6 +1265,45 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.openSuccess();
    }
 
+   removeExcelItem() {
+      const buttons = [
+         {
+            text: 'Yes', click: (_e: any, modal: any) => {
+               this.closeResult = 'Yes';
+               (this.dialog as any) = null;
+
+               this.itemExcelLineDatagrid.removeSelected();
+               modal.close(true);
+            }
+         },
+         {
+            text: 'No', click: (_e: any, modal: any) => {
+               this.closeResult = 'No';
+               (this.dialog as any) = null;
+               this.itemExcelLineDatagrid.unSelectAllRows();
+               modal.close(true);
+            },
+            isDefault: true
+         }];
+
+      if (this.itemExcelLineDatagrid.dataset.length > 0) {
+         this.dialog = (this.messageService as any)
+            .message()
+            .title('<span>Delete these Items?</span>')
+            .message('<span class="message">You are about to delete this items. Would you like to proceed?</span>')
+            .buttons(buttons)
+            .beforeClose(() => {
+               return true;
+            }).beforeOpen(() => {
+               return true;
+            }).opened(() => {
+            })
+            .open();
+      } else {
+         this.showToast('Item List', 'Empty Item List');
+      }
+   }
+
    //UPload Excel End
 
    private setBusy(isCall: string, isBusy: boolean) {
@@ -1213,6 +1319,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
          this.isCustomerBusy = isBusy;
       } else if (isCall == "excelData") {
          this.isItemExcelBusy = isBusy;
+      } else if (isCall == "addItemData") {
+         this.isAddItemBusy = isBusy;
       }
 
    }

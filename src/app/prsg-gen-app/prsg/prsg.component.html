@@ -25,7 +25,7 @@
                            <svg soho-icon icon="search"></svg>
                         </div>
                         <div class="field-short pr10">
-                           <input type="text" name="text-business-chain" id="text-business-chain"
+                           <input type="text" class="widthsm" name="text-business-chain" id="text-business-chain"
                               placeholder="Business Chain" [(ngModel)]="businessChainText">
                         </div>
                         <div class="field-short">
@@ -54,7 +54,7 @@
                            <svg soho-icon icon="search"></svg>
                         </div>
                         <div class="field-short pr10">
-                           <input type="text" name="text-item" id="text-item" placeholder="Items"
+                           <input type="text" class="widthsm" name="text-item" id="text-item" placeholder="Items"
                               [(ngModel)]="itemText">
                         </div>
                         <div class="field-short">
@@ -111,12 +111,33 @@
             <div soho-tab-panel tabId="tabs-upload-excel">
 
                <div class="row fixcenter">
+                  <div class="three columns">
+                     <div class="upload_left">
+                        <div class="field">
+                           <label soho-label for="uploadexcel">Select File - {{fileLimits}}</label>
+                           <input soho-fileupload id="uploadexcel" name=uploadexcel accept="{{fileLimits}}"
+                              (change)="onExcelChange($event)" />
+                        </div>
+                        <div class="field-short">
+                           <button class="btn-primary btn_width_full btn-normal" type="button"
+                              (click)="updateExcelGrid()">Upload Excel</button>
+                        </div>
+                        <!-- <div class="field single-line-field">
+                                             <label for="order-total" class="label">Order Total : </label>
+                                             <input type="text" id="order-total" name="order-total" />
+                                          </div> -->
+                        <div class="field single-line-field">
+                           <p>Click here to <a href="/assets/item-sample.xlsx" download>Download</a> sample excel
+                              file</p>
+                        </div>
+                     </div>
+                  </div>
                   <div class="six columns">
                      <fieldset class="myfieldset" aria-labelledby="fieldset-id">
                         <legend id="fieldset-id">Order Header</legend>
                         <div class="row">
                            <div class="six columns">
-                              <div class="field">
+                              <div class="field-short">
                                  <label for="facility" class="label">Facility</label>
                                  <select soho-dropdown soho-busyindicator id="facility" name="facility"
                                     placeholder="Select Facility" [(ngModel)]="exceldataFacility" aria-required="true"
@@ -126,7 +147,7 @@
                                        {{faci.FACN}}</option>
                                  </select>
                               </div>
-                              <div class="field">
+                              <div class="field-short">
                                  <label for="order-type" class="label">Order Type</label>
                                  <select soho-dropdown soho-busyindicator id="order-type" name="order-type"
                                     placeholder="Select Order Type" [(ngModel)]="exceldataOrderType"
@@ -136,7 +157,7 @@
                                        {{ordData.ORTP}} - {{ordData.TX40}}
                                  </select>
                               </div>
-                              <div class="field">
+                              <div class="field-short">
                                  <label for="customer" class="label">Customer</label>
                                  <input soho-autocomplete id="customer" name="customer" aria-required="true"
                                     data-validate="required" [source]="excellistCUstomerSource"
@@ -146,7 +167,7 @@
                               </div>
                            </div>
                            <div class="six columns">
-                              <div class="field">
+                              <div class="field-short">
                                  <label for="whlo" class="label">Delivery Warehouse</label>
                                  <select soho-dropdown soho-busyindicator id="whlo" name="whlo"
                                     placeholder="Select Warehouse" [(ngModel)]="exceldataWarehouse" aria-required="true"
@@ -156,13 +177,13 @@
                                        {{whData.WHLO}} - {{whData.WHNM}}
                                  </select>
                               </div>
-                              <div class="field">
+                              <div class="field-short">
                                  <label for="delivery-date" class="label">Delivery Date</label>
                                  <input soho-datepicker id="delivery-date" name="delivery-date"
                                     [options]="datePickerOptions" placeholder="Select Delivery Date"
                                     [(ngModel)]="exceldataDeliveryDate" aria-required="true" data-validate="required" />
                               </div>
-                              <div class="field">
+                              <div class="field-short">
                                  <label for="sales-rep" class="label">Sales Rep</label>
                                  <input soho-autocomplete id="sales-rep" name="sales-rep" aria-required="true"
                                     data-validate="required" [source]="excellistSalesRepSource"
@@ -173,27 +194,7 @@
                         </div>
                      </fieldset>
                   </div>
-                  <div class="three columns">
-                     <div class="upload_left">
-                        <div class="field">
-                           <label soho-label for="uploadexcel">Select File - {{fileLimits}}</label>
-                           <input soho-fileupload id="uploadexcel" name=uploadexcel accept="{{fileLimits}}"
-                              (change)="onExcelChange($event)" />
-                        </div>
-                        <button class="btn-primary btn_width_full btn-normal" type="button"
-                           (click)="updateExcelGrid()">Upload Excel</button>
-                        <!-- <div class="field single-line-field">
-                           <label for="order-total" class="label">Order Total : </label>
-                           <input type="text" id="order-total" name="order-total" />
-                        </div> -->
-                        <div class="all_create">
-                           <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button"
-                              (click)="clearExcelAll()">Clear Order</button>
-                           <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button"
-                              (click)="genExcelOrder()" [disabled]="!isEnabled()">Create Order</button>
-                        </div>
-                     </div>
-                  </div>
+
                   <div class="three columns">
                      <div class="additemdiv">
                         <div class="itembottom">
@@ -201,12 +202,16 @@
                               <svg soho-icon icon="search"></svg>
                            </div>
                            <div class="field-short pr10">
-                              <input type="text" name="text-item1" id="text-item1" placeholder="Items"
-                                 [(ngModel)]="itemText1">
+                              <input soho-autocomplete id="text-item1" name="text-item1" aria-required="true"
+                                 placeholder="Items" class="widthsm" data-validate="required"
+                                 [source]="excellistAddItemSource" [template]="excelItemTemplate" filterMode="contains"
+                                 (selected)="onSelectedAddItemExcel($event)" [(ngModel)]="itemText1" soho-busyindicator
+                                 [activated]="isAddItemBusy" [blockUI]="true" [displayDelay]="0">
+
                            </div>
                            <div class="field-short">
-                              <button class="btn-primary btn_width_full btn-normal" type="button"
-                                 id="add_item">Add</button>
+                              <button class="btn-primary btn_width_full btn-normal" type="button" id="add_item"
+                                 (click)="addItemExcel()">Add</button>
                            </div>
                         </div>
                      </div>
@@ -220,6 +225,21 @@
                            soho-busyindicator [activated]="isItemExcelBusy" [blockUI]="true" [displayDelay]="0"
                            (cellchange)="onExcelCellChange($event)">
                         </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="all_create_left">
+                        <button class="btn-primary btn_width_full btn-normal btn-remove" type="button"
+                           (click)="removeExcelItem()">Remove Selected</button>
+                     </div>
+                     <div class="all_create_right">
+                        <button class="btn-primary btn_width_full btn-normal btn-cancel" type="button"
+                           (click)="clearExcelAll()">Clear Order</button>
+                        <button class="btn-primary btn_width_full btn-normal btn-confirm" type="button"
+                           (click)="genExcelOrder()" [disabled]="!isEnabled()">Create Order</button>
                      </div>
                   </div>
                </div>
