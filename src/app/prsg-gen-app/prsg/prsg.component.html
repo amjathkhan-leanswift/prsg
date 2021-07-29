@@ -198,7 +198,7 @@
                   <div class="three columns">
                      <div class="additemdiv">
                         <div class="itembottom">
-                           <div class="field-short pr10">
+                           <!-- <div class="field-short pr10">
                               <svg soho-icon icon="search"></svg>
                            </div>
                            <div class="field-short pr10">
@@ -212,6 +212,10 @@
                            <div class="field-short">
                               <button class="btn-primary btn_width_full btn-normal" type="button" id="add_item"
                                  (click)="addItemExcel()">Add</button>
+                           </div> -->
+                           <div class="field-short">
+                              <input soho-lookup field="productName" [(ngModel)]="lookupValue"
+                                 [click]="onLookupClick" />
                            </div>
                         </div>
                      </div>

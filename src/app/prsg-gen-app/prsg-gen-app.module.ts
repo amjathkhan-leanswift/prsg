@@ -10,6 +10,7 @@ import { PrsgGenAppComponent } from './prsg-gen-app.component';
 import { PrsgComponent } from './prsg/prsg.component';
 import { ChainModalComponent } from './prsg/chain-modal/chain-modal.component';
 import { CreateModalComponent } from './prsg/create-modal/create-modal.component';
+import { ItemModalComponent } from './prsg/item-modal/item-modal.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { CreateModalComponent } from './prsg/create-modal/create-modal.component
       PrsgGenAppComponent,
       PrsgComponent,
       ChainModalComponent,
-      CreateModalComponent
+      CreateModalComponent,
+      ItemModalComponent
    ],
    imports: [
       CommonModule,

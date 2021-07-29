@@ -14,11 +14,12 @@ import {
    SohoMessageRef,
    SohoAutoCompleteComponent,
    SohoModalDialogService, SohoModalDialogRef,
-   SohoFileUploadComponent, SohoTrackDirtyDirective
+   SohoFileUploadComponent, SohoTrackDirtyDirective, SohoLookupComponent
 } from 'ids-enterprise-ng';
 
 import { ChainModalComponent } from './chain-modal/chain-modal.component'
 import { CreateModalComponent } from './create-modal/create-modal.component';
+import { ItemModalComponent } from './item-modal/item-modal.component';
 import { GlobalConstants } from './global-constants';
 
 import * as XLSX from 'xlsx';
@@ -34,7 +35,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    placeholder?: ViewContainerRef;
 
    isInitItemBusy: boolean = false;
-   maxRecords = 10000
+   maxRecords = 10000;
 
    @ViewChild('customerLineDatagrid') customerLineDatagrid: SohoDataGridComponent;
    customerGridOptions: SohoDataGridOptions;
@@ -146,6 +147,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
    isAddItemBusy: boolean = false;
    excelAdditemData?: any = [];
    tempAddItem?: any = []
+
+   @ViewChild(SohoLookupComponent, { static: true }) sohoLookup?: SohoLookupComponent;
+   lookupValue = '';
+   tempModalItem?: any = [];
 
    constructor(
       private miService: MIService,
@@ -1190,6 +1195,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.fileupload.clearUploadFile();
       this.itemText1 = null;
       this.excelDataArr = [];
+      this.lookupValue = "";
       this.updateExcelGrid();
    }
 
@@ -1304,6 +1310,51 @@ export class PrsgComponent extends CoreBase implements OnInit {
       } else {
          this.showToast('Item List', 'Empty Item List');
       }
+   }
+
+   onLookupClick = () => {
+      const dialog = this.modalDialog.modal(ItemModalComponent);
+      let dialogComponent: ItemModalComponent;
+
+      dialog.buttons([
+         {
+            text: 'Cancel',
+            click: () => dialog.close()
+         },
+         {
+            text: 'Apply',
+            isDefault: true,
+            click: () => dialog.close(true)
+         }
+      ])
+         .open()
+         .apply((comp: ItemModalComponent) => {
+            comp.lookupValue = this.lookupValue;
+            dialogComponent = comp;
+         })
+         .afterClose((result) => {
+            if (result && this.sohoLookup) {
+               this.tempModalItem = [];
+               this.tempModalItem = dialogComponent.selectedItem;
+               this.addItemModal();
+               // console.log(dialogComponent.selectedItem);
+            }
+         });
+   }
+
+   addItemModal() {
+      this.excelDataArr = [];
+      this.excelDataArr = this.itemExcelLineDatagrid.dataset;
+
+      this.tempModalItem.forEach((item: any) => {
+         var itemCheck = this.excelDataArr.find((x: any) => (x.ITNO + "" === item.ITNO));
+         if (!itemCheck) {
+            this.excelDataArr.push(item);
+         } else {
+            this.showToast(item.ITNO, 'Item already exist in the list');
+         }
+      });
+      this.updateExcelGrid();
    }
 
    //UPload Excel End
