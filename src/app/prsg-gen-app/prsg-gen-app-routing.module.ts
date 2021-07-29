@@ -5,7 +5,7 @@ import { PrsgComponent } from './prsg/prsg.component';
 
 const routes: Routes = [
    {
-      path: 'prsg', component: PrsgGenAppComponent, children: [
+      path: 'quick-order-entry', component: PrsgGenAppComponent, children: [
          { path: '', component: PrsgComponent }
       ]
    }

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-   { path: '', redirectTo: '/prsg', pathMatch: 'full' }
+   { path: '', redirectTo: '/quick-order-entry', pathMatch: 'full' }
 ];
 
 @NgModule({

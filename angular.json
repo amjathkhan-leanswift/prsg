@@ -3,7 +3,7 @@
    "version": 1,
    "newProjectRoot": "projects",
    "projects": {
-      "prsg": {
+      "quick-order-entry": {
          "projectType": "application",
          "schematics": {},
          "root": "",
@@ -76,18 +76,18 @@
             "serve": {
                "builder": "@angular-devkit/build-angular:dev-server",
                "options": {
-                  "browserTarget": "prsg:build"
+                  "browserTarget": "quick-order-entry:build"
                },
                "configurations": {
                   "production": {
-                     "browserTarget": "prsg:build:production"
+                     "browserTarget": "quick-order-entry:build:production"
                   }
                }
             },
             "extract-i18n": {
                "builder": "@angular-devkit/build-angular:extract-i18n",
                "options": {
-                  "browserTarget": "prsg:build"
+                  "browserTarget": "quick-order-entry:build"
                }
             },
             "test": {
@@ -124,16 +124,16 @@
                "builder": "@angular-devkit/build-angular:protractor",
                "options": {
                   "protractorConfig": "e2e/protractor.conf.js",
-                  "devServerTarget": "prsg:serve"
+                  "devServerTarget": "quick-order-entry:serve"
                },
                "configurations": {
                   "production": {
-                     "devServerTarget": "prsg:serve:production"
+                     "devServerTarget": "quick-order-entry:serve:production"
                   }
                }
             }
          }
       }
    },
-   "defaultProject": "prsg"
+   "defaultProject": "quick-order-entry"
 }

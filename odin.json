@@ -1,5 +1,5 @@
 {
-   "projectName": "prsg",
+   "projectName": "quick-order-entry",
    "proxy": {
       "/m3api-rest": {
          "target": "https://mingle-ionapi.inforcloudsuite.com/PRSUPPLIES_TRN",

@@ -331,35 +331,19 @@ export class PrsgComponent extends CoreBase implements OnInit {
                resizable: false, align: 'center', formatter: Soho.Formatters.SelectionCheckbox
             },
             {
-               width: '15%', id: 'col-itno', field: 'ITNO', name: 'Item',
+               width: '35%', id: 'col-itno', field: 'ITNO', name: 'Item',
                resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
             },
             {
-               width: '32%', id: 'col-itds', field: 'ITDS', name: 'Name',
-               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
-            },
-            {
-               width: '8%', id: 'col-stat', field: 'STAT', name: 'Status',
-               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
-            },
-            {
-               width: '8%', id: 'col-itty', field: 'ITTY', name: 'Type',
-               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
-            },
-            {
-               width: '8%', id: 'col-itgr', field: 'ITGR', name: 'Group',
-               resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
-            },
-            {
-               width: '8%', id: 'col-orqt', field: 'ORQT', name: 'Quantity',
+               width: '20%', id: 'col-orqt', field: 'ORQT', name: 'Quantity',
                resizable: true, formatter: Soho.Formatters.Decimal, editor: Soho.Editors.Input
             },
             {
-               width: '8%', id: 'col-alun', field: 'ALUN', name: 'UOM',
+               width: '20%', id: 'col-alun', field: 'ALUN', name: 'UOM',
                resizable: true, editor: Soho.Editors.Input
             },
             {
-               width: '8%', id: 'col-sapr', field: 'SAPR', name: 'Price',
+               width: '20%', id: 'col-sapr', field: 'SAPR', name: 'Price',
                resizable: true, formatter: Soho.Formatters.Decimal, editor: Soho.Editors.Input
             }
          ],
@@ -370,6 +354,26 @@ export class PrsgComponent extends CoreBase implements OnInit {
          }
       };
       this.itemExcelGridOptions = itemExcelOptions;
+   }
+
+   wastetest() {
+      // ,
+      // {
+      //    width: '32%', id: 'col-itds', field: 'ITDS', name: 'Name',
+      //       resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+      // },
+      // {
+      //    width: '8%', id: 'col-stat', field: 'STAT', name: 'Status',
+      //       resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+      // },
+      // {
+      //    width: '8%', id: 'col-itty', field: 'ITTY', name: 'Type',
+      //       resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+      // },
+      // {
+      //    width: '8%', id: 'col-itgr', field: 'ITGR', name: 'Group',
+      //       resizable: true, filterType: 'text', filterConditions: ['contains', 'equals'], sortable: true
+      // },
    }
 
    async initData() {

@@ -7,10 +7,9 @@
             <div soho-tab-list-container>
                <ul soho-tab-list>
                   <li soho-tab><a soho-tab-title tabId="tabs-business-chain" class="fixcenter"><svg soho-icon
-                           icon="cascade-objects"></svg> Business Chain</a></li>
+                           icon="cascade-objects"></svg> Quick Order Entry</a></li>
                   <li soho-tab><a soho-tab-title tabId="tabs-upload-excel" class="fixcenter"><svg soho-icon
-                           icon="tree-xls"></svg> Upload
-                        Excel</a></li>
+                           icon="tree-xls"></svg> Upload Excel</a></li>
                </ul>
             </div>
          </div>
@@ -214,8 +213,8 @@
                                  (click)="addItemExcel()">Add</button>
                            </div> -->
                            <div class="field-short">
-                              <input soho-lookup field="productName" [(ngModel)]="lookupValue"
-                                 [click]="onLookupClick" />
+                              <input soho-lookup field="productName" [(ngModel)]="lookupValue" [click]="onLookupClick"
+                                 placeholder="Item Search" />
                            </div>
                         </div>
                      </div>
