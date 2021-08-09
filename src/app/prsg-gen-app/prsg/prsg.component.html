@@ -83,10 +83,9 @@
                         <button class="btn-primary btn_width_full btn-normal" type="button" (click)="genMatrix()">Add
                            Orders</button>
 
-                        <button class="btn-primary btn_width_full btn-normal btn-confirm buttondiv_right" type="button"
-                           (click)=genOrder()>Generate Order</button>
-                        <!-- <button class="btn-primary btn_width_full btn-normal buttondiv_right" type="button"
-                           (click)="checkOrder()">Check Order</button> -->
+                        <!-- <button class="btn-primary btn_width_full btn-normal btn-confirm buttondiv_right" type="button"
+                           (click)=genOrder()>Generate Order</button> -->
+
                      </div>
                   </div>
                </div>
@@ -98,6 +97,14 @@
                            [activated]="isMatrixBusy" [blockUI]="true" [displayDelay]="0"
                            (cellchange)="onCellChange($event)">
                         </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="twelve columns">
+                     <div class="field-short field-stacked mb0">
+                        <button class="btn-primary btn_width_full btn-normal btn-confirm buttondiv_right" type="button"
+                           (click)=genOrder()>Create Order</button>
                      </div>
                   </div>
                </div>
