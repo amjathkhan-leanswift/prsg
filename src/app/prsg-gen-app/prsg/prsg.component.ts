@@ -909,7 +909,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
                   };
                   await this.miService.execute(request_line)
                      .toPromise()
-                     .then((response: any) => {
+                     .then(async (response: any) => {
                         GlobalConstants.orderError = 0;
                         console.log(response.items);
                      })
@@ -921,6 +921,25 @@ export class PrsgComponent extends CoreBase implements OnInit {
                      this.orderItemError.push({ 'ITNO': itemOrder.ITNO });
                   }
                }
+
+               let inputRecord_conf = {
+                  ORNO: ornoValue,
+               }
+               const request_line_conf: IMIRequest = {
+                  program: 'OIS100MI',
+                  transaction: 'Confirm',
+                  record: inputRecord_conf,
+                  outputFields: ['ORNO', 'STAT']
+               };
+               await this.miService.execute(request_line_conf)
+                  .toPromise()
+                  .then((response: any) => {
+                     console.log(response.items);
+                  })
+                  .catch(function (error) {
+                     // GlobalConstants.orderError = 1;
+                     console.log("Confirmation Error", error.errorMessage);
+                  });
 
             })
             .catch(function (error) {
@@ -1253,9 +1272,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
                   };
                   await this.miService.execute(request_line)
                      .toPromise()
-                     .then((response: any) => {
+                     .then(async (response: any) => {
                         GlobalConstants.orderError = 0;
                         console.log(response.items);
+
                      })
                      .catch(function (error) {
                         GlobalConstants.orderError = 1;
@@ -1266,6 +1286,24 @@ export class PrsgComponent extends CoreBase implements OnInit {
                   }
                }
             }
+            let inputRecord_conf = {
+               ORNO: ornoValue,
+            }
+            const request_line_conf: IMIRequest = {
+               program: 'OIS100MI',
+               transaction: 'Confirm',
+               record: inputRecord_conf,
+               outputFields: ['ORNO', 'STAT']
+            };
+            await this.miService.execute(request_line_conf)
+               .toPromise()
+               .then((response: any) => {
+                  console.log(response.items);
+               })
+               .catch(function (error) {
+                  //GlobalConstants.orderError = 1;
+                  console.log("Confirmation Error", error.errorMessage);
+               });
 
          })
          .catch(function (error) {
