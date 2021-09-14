@@ -92,6 +92,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    excellistWareHouseData: any = [];
    excellistSalesRep: any = [];
    excellistCustmer: any = [];
+   excellistBusChain: any = [];
 
    excelsaleRepTemplate = `<script type="text/html">
       <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
@@ -112,6 +113,15 @@ export class PrsgComponent extends CoreBase implements OnInit {
       </script>`;
 
    excelItemTemplate = `<script type="text/html">
+      <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
+         <a tabindex="-1">
+            <span class="display-value">{{{label}}}</span>
+            <!--span class="display-value display-newline"></span-->
+         </a>
+      </li>
+      </script>`;
+
+   excelChainTemplate = `<script type="text/html">
       <li id="{{listItemId}}" {{#hasValue}} data-value="{{value}}" {{/hasValue}} role="listitem">
          <a tabindex="-1">
             <span class="display-value">{{{label}}}</span>
@@ -382,6 +392,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       await this.excelinitLstOrderTypes();
       await this.excelinitLstWarehouses();
       await this.excelinitSalesRep();
+      await this.excelinitBusChain();
       this.setBusy('initialData', false);
    }
 
@@ -1078,6 +1089,34 @@ export class PrsgComponent extends CoreBase implements OnInit {
       response(term, this.excellistSalesRep);
    }
 
+   async excelinitBusChain() {
+      this.excellistBusChain = [];
+      const request: IMIRequest = {
+         program: 'CMS100MI',
+         transaction: 'LstBusChain',
+         outputFields: ['OGCHAI', 'OKCUNM'],
+         maxReturnedRecords: this.maxRecords
+      };
+      await this.miService.execute(request)
+         .toPromise()
+         .then((response: any) => {
+            // console.log(response.items);
+            let templistBusChain = response.items;
+            templistBusChain.forEach((item: any) => {
+               this.excellistBusChain.push({
+                  'label': item.OGCHAI + ' - ' + item.OKCUNM, 'ogchai': item.OGCHAI, 'okcunm': item.OKCUNM, 'value': item.OGCHAI + ' - ' + item.OKCUNM
+               });
+            });
+         })
+         .catch(function (error) {
+            console.log("List Business Chain Data Error", error.errorMessage);
+         });
+   }
+
+   public excellistBusChainSource = (term: string, response: any) => {
+      response(term, this.excellistBusChain);
+   }
+
    public excellistCUstomerSource = async (term: string, response: any) => {
       this.setBusy('customerData', true);
 
@@ -1112,6 +1151,10 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    onSelectedSalesRepExcel(event: any) {
       this.exceldataSalesRep = event[2].smcd;
+   }
+
+   onSelectedBusChainExcel(event: any) {
+      this.businessChainText = event[2].ogchai;
    }
 
    onSelectedCustomerExcel(event: any) {

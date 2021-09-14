@@ -24,8 +24,14 @@
                            <svg soho-icon icon="search"></svg>
                         </div>
                         <div class="field-short pr10">
-                           <input type="text" class="widthsm" name="text-business-chain" id="text-business-chain"
-                              placeholder="Business Chain" [(ngModel)]="businessChainText">
+                           <!-- <input type="text" class="widthsm" name="text-business-chain" id="text-business-chain"
+                              placeholder="Business Chain" [(ngModel)]="businessChainText"> -->
+
+                           <input soho-autocomplete id="bus-chain" name="bus-chain" aria-required="true"
+                              data-validate="required" [source]="excellistBusChainSource"
+                              [template]="excelChainTemplate" filterMode="contains"
+                              (selected)="onSelectedBusChainExcel($event)" [(ngModel)]="businessChainText">
+
                         </div>
                         <div class="field-short">
                            <button class="btn-primary btn_width_full btn-normal" type="button" id="search_cus"
