@@ -55,6 +55,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
    pageSize = 10;
    businessChainText: any;
+   businessChainText1: any;
    customerData: any = [];
    chainTitle?: string;
    selectedCustItems?: any = [];
@@ -399,7 +400,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    //Customer Search Start
 
    searchBusinessChain() {
-      if (this.businessChainText != '' && this.businessChainText != null) {
+      if (this.businessChainText1 != '' && this.businessChainText1 != null) {
          const dialog = this.modalDialog.modal(ChainModalComponent);
          let dialogComponent: ChainModalComponent;
 
@@ -415,9 +416,9 @@ export class PrsgComponent extends CoreBase implements OnInit {
             }
          ])
 
-            .title(`${this.businessChainText} - Business Chain List`)
+            .title(`${this.businessChainText1} - Business Chain List`)
             .apply((comp: ChainModalComponent) => {
-               comp.businessChainData = this.businessChainText;
+               comp.businessChainData = this.businessChainText1;
                dialogComponent = comp;
             })
             .open()
@@ -764,6 +765,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
       this.itemOrderArray = [];
       this.orderData = [];
       this.businessChainText = null;
+      this.businessChainText1 = null;
       this.itemText = null;
 
    }
@@ -1154,7 +1156,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
 
    onSelectedBusChainExcel(event: any) {
-      this.businessChainText = event[2].ogchai;
+      this.businessChainText = event[2].label;
+      this.businessChainText1 = event[2].ogchai;
    }
 
    onSelectedCustomerExcel(event: any) {
