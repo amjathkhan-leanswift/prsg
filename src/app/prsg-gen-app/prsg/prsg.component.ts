@@ -1158,6 +1158,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    onSelectedBusChainExcel(event: any) {
       this.businessChainText = event[2].label;
       this.businessChainText1 = event[2].ogchai;
+      this.searchBusinessChain();
    }
 
    onSelectedCustomerExcel(event: any) {

@@ -332,3 +332,7 @@ fieldset > legend, .fieldset > legend{
 .field-short input.widthsm{
    width:200px !important;
 }
+
+.field-short.l350 input{
+    width:350px !important;
+}

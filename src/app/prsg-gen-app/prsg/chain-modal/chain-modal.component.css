@@ -10,3 +10,7 @@ p.errormsg{
    text-align: center;
    font-weight: 600;
 }
+
+::ng-deep .dropchain .field .dropdown{
+   width:420px !important;
+}
