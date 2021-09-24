@@ -60,6 +60,9 @@ export class PrsgComponent extends CoreBase implements OnInit {
    chainTitle?: string;
    selectedCustItems?: any = [];
 
+   selectedCUNO?: any;
+   selectedCUNM?: any;
+
    itemText: any;
    itemData: any = [];
    selectedInvItems?: any = [];
@@ -426,6 +429,8 @@ export class PrsgComponent extends CoreBase implements OnInit {
                if (result) {
                   //console.log(dialogComponent.selectedChain);
                   this.chainTitle = dialogComponent.selectedChain;
+                  this.selectedCUNO = dialogComponent.selectedChainCUNO;
+                  this.selectedCUNM = dialogComponent.selectedChainCUNM;
                   if (dialogComponent.selectedChain != undefined && dialogComponent.selectedChain != '-1') {
                      this.LstBusChainCust(dialogComponent.selectedChain);
                   } else {
@@ -491,7 +496,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
             });
       }
       console.log(this.customerData);
-      this.customerLineDatagrid.toolbar = { 'title': this.chainTitle + ' - Customer List', actions: true, results: true, personalize: true, exportToExcel: true };
+      this.customerLineDatagrid.toolbar = { 'title': this.selectedCUNO + ' - ' + this.selectedCUNM, actions: true, results: true, personalize: true, exportToExcel: true };
       this.updateCustomerList();
       this.setBusy('custData', false);
    }
@@ -670,6 +675,15 @@ export class PrsgComponent extends CoreBase implements OnInit {
 
       };
       console.log(this.dropUOM);
+      let itemCount = 0;
+      this.selectedCustItems.forEach((itemAdd: any) => {
+         let invCount = 0;
+         this.selectedInvItems.forEach((item: any, index: any) => {
+            this.selectedCustItems[itemCount]['UOM-' + item.ITNO] = this.dropUOM[invCount][0].value;
+            invCount = invCount + 1;
+         });
+         itemCount = itemCount + 1;
+      });
    }
 
    async loadOrderColumnData() {
@@ -752,6 +766,7 @@ export class PrsgComponent extends CoreBase implements OnInit {
    }
 
    updateMatrixGrid() {
+      console.log(this.selectedCustItems);
       this.matrixLineDatagrid ? this.matrixLineDatagrid.dataset = this.selectedCustItems : this.matrixLineDatagrid.dataset = this.selectedCustItems;
       this.setBusy('matrixData', false);
    }

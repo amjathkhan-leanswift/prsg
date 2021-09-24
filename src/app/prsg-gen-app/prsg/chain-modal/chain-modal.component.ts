@@ -17,6 +17,8 @@ export class ChainModalComponent implements OnInit {
    @Input() businessChainData: any;
    isInitChainBusy: boolean = false;
    selectedChain: any;
+   selectedChainCUNO?: any;
+   selectedChainCUNM?: any;
    getChainsData: any = [];
    listChainsData: any = [];
 
@@ -106,6 +108,15 @@ export class ChainModalComponent implements OnInit {
    private setBusy(isCall: string, isBusy: boolean) {
       if (isCall == "initialChainData") {
          this.isInitChainBusy = isBusy;
+      }
+   }
+
+   onSelectedChainItem(event: any) {
+      let chainData = event.target.value;
+      let chainFilter = this.listChainsData.filter((item: any) => item.CUNO === chainData);
+      if (chainFilter.length > 0) {
+         this.selectedChainCUNO = chainFilter[0].CUNO;
+         this.selectedChainCUNM = chainFilter[0].CUNM;
       }
    }
 }

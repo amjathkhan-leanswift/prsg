@@ -2,7 +2,8 @@
    <div class="twelve columns">
       <div class="field">
          <select soho-dropdown soho-busyindicator noSearch id="business_chain" name="business_chain"
-            placeholder="Select Business Chain" [(ngModel)]="selectedChain" *ngIf="!isErrorChain">
+            placeholder="Select Business Chain" [(ngModel)]="selectedChain" *ngIf="!isErrorChain"
+            (change)="onSelectedChainItem($event)">
             <option value="-1">&nbsp;</option>
             <option *ngFor="let chain of listChainsData" [value]="chain.CUNO">{{chain.CUNO}} - {{chain.CUNM}}</option>
          </select>
